@@ -1,0 +1,4 @@
+@TOTDistribution.WebApi_HostAddress = http://localhost:5029
+
+GET {{TOTDistribution.WebApi_HostAddress}}/current-totd/
+Accept: application/json
