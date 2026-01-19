@@ -9,5 +9,5 @@ This project is currently un
 
 ## Features
 There are two parts to this program.
-    1. The NadeoCommunicator: Gets necessary data from Nadeo's official servers and processes it for our main database. Temporary values are stored in a Redis database. It only performs create, update, and delete operations via various commands. 
-    2. The Web API: Communicates with the frontend to get TOTD information from our SQL Server database. It only performs read operations via various queries.
+1. The NadeoCommunicator: Gets necessary data from Nadeo's official servers and processes it for our main database. Temporary values are stored in a Redis database. It only performs create, update, and delete operations via various commands. 
+1. The Web API: Communicates with the frontend to get TOTD information from our SQL Server database. It only performs read operations via various queries.
