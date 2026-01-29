@@ -6,10 +6,11 @@ namespace TOTDistribution.NadeoRefinery.Entities;
 /// <summary>
 /// Entity for storing TOTD data in Redis
 /// </summary>
-[Document(Prefixes = new[]{"Map"})]
+[Document(Prefixes = new[]{"totd:map"})]
 public class TOTDInfo
 {
-    [RedisIdField][Indexed]
+    [RedisIdField]
+    [Indexed]
     public string MapUid { get; set; } = string.Empty;
 
     [Indexed]
@@ -46,10 +47,4 @@ public class TOTDInfo
     public DateTimeOffset UpdateTimestamp { get; set; }
 
     public Uri? ThumbnailUrl { get; set; }
-
-    // TODO: Add validation
-    public string GetRedisKey()
-    {
-        return "totd:" + MapUid;
-    }
 }

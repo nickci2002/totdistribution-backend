@@ -1,3 +1,5 @@
+using Redis.OM;
+using Serilog;
 using TOTDistribution.NadeoRefinery;
 using TOTDistribution.NadeoRefinery.Entities;
 using TOTDistribution.NadeoRefinery.Features.Queries;
@@ -13,6 +15,8 @@ builder.Services.AddTransient<ObtainCurrentTOTDInfo>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Host.AddHost();
+//onfigureHostBuilder
 
 var app = builder.Build();
 
@@ -23,10 +27,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseSerilogRequestLogging();
 
-app.MapGet("/totd", async(ObtainCurrentTOTDInfo query) =>
+app.MapGet("/totd", async(ObtainCurrentTOTDInfo query, RedisConnectionProvider provider) =>
 {
     TOTDInfo totdInfo = await query.ExecuteQuery();
+    await query.StoreDataAsync(totdInfo);
+    
     return totdInfo;
 });
 

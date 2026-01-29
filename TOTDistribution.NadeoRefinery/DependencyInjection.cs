@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using TOTDistribution.NadeoRefinery.Data;
-using StackExchange.Redis;
+﻿using TOTDistribution.NadeoRefinery.Data;
 using TOTDistribution.NadeoRefinery.Services;
+using Serilog;
+using TOTDistribution.Shared;
 
 namespace TOTDistribution.NadeoRefinery;
 
@@ -15,10 +14,19 @@ public static class DependencyInjection
             .AddEnvironmentVariables()
             .Build();
 
+        services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.Converters.Add(new MapGuidConverter());
+            options.SerializerOptions.Converters.Add(new PlayerGuidConverter());
+        });
+
         services.AddRedisDb(config.GetSection("Redis"));
         services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
+    }
 
-        // lol
+    public static void AddHost(this IHostBuilder host)
+    {
+        host.AddSerilog();
     }
 
 }
