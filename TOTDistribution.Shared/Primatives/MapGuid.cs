@@ -8,6 +8,7 @@ public readonly record struct MapGuid
     public Guid Value { get; init; }
 
     public static implicit operator MapGuid(Guid value) => new MapGuid { Value = value };
+    public static implicit operator MapGuid(Guid? value) => new MapGuid { Value = value ?? Guid.Empty };
 }
 
 public class MapGuidConverter : JsonConverter<MapGuid>

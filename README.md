@@ -1,13 +1,13 @@
 # totdistribution-backend
-Backend for TM2020 Track of the Day statistics website written in .NET 10, using Vertical Slice Architecture.
-This project is currently un
+Backend for TM2020 Track of the Day statistics website written in .NET 10, VSA with a microservice.
+This project is being actively worked on as a full-stack solution with plans to deploy to the Azure cloud.
 
 ## Tools
 - .NET 10 (Framework the backend is written in)
 - SQL Server 2025 (Database for interacting with the frontend)
-- RedisDB (Temporary storage for in-progress Track of the Day events)
+- RedisDB (Temporary storage for in-progress Track of the Day data)
 
 ## Features
-There are two parts to this program.
-    1. The NadeoCommunicator: Gets necessary data from Nadeo's official servers and processes it for our main database. Temporary values are stored in a Redis database. It only performs create, update, and delete operations via various commands. 
-    2. The Web API: Communicates with the frontend to get TOTD information from our SQL Server database. It only performs read operations via various queries.
+There are two .NET projects in this solution:
+1. NadeoRefinery: A background service that communicates with Nadeo's servers to obtain necessary data and processes them for permanent storage in our main database. It runs on a set scheduler using the Quartz.NET scheduler and stores data temporarily in a Redis database.
+1. WebAPI: Our main backend that houses our SQL Server database for permanent storage. It will allow queries from our frontend and commands from our NadeoRefinery.

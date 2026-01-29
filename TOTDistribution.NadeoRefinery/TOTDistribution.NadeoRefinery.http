@@ -1,6 +1,6 @@
 @TOTDistribution.WebApi_HostAddress = http://localhost:5124
 
-GET {{TOTDistribution.WebApi_HostAddress}}/weatherforecast/
+GET {{TOTDistribution.WebApi_HostAddress}}/totd/
 Accept: application/json
 
 ###

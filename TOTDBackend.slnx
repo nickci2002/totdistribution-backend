@@ -1,3 +1,6 @@
 <Solution>
+  <Project Path="TOTDistribution.NadeoRefinery/TOTDistribution.NadeoRefinery.csproj" />
+  <Project Path="TOTDistribution.Shared/TOTDistribution.Shared.csproj" />
+  <Project Path="TOTDistribution.Test/TOTDistribution.Test.csproj" />
   <Project Path="TOTDistribution.WebApi/TOTDistribution.WebApi.csproj" />
 </Solution>
