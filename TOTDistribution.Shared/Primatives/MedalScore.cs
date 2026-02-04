@@ -1,28 +1,18 @@
-using System.Diagnostics;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using TmEssentials;
+using TOTDistribution.Shared.JsonConverters;
 
 namespace TOTDistribution.Shared;
 
-public readonly record struct MedalScore
+[JsonConverter(typeof(PrimitiveConverter<MedalScore, int>))]
+public readonly record struct MedalScore : IPrimitiveType<int>
 {
     public int Value { get; init; }
 
     public static implicit operator MedalScore(TimeInt32 value) =>
-        new MedalScore { Value = value.TotalMilliseconds };
+        new() { Value = value.TotalMilliseconds };
+
+    public override string ToString() => $"{Value}";
 }
 
-public class MedalScoreConverter : JsonConverter<MedalScore>
-{
-    public override MedalScore Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        Debug.Assert(typeToConvert == typeof(MedalScore));
-        return new MedalScore{Value = reader.GetInt32()};
-    }
 
-    public override void Write(Utf8JsonWriter writer, MedalScore value, JsonSerializerOptions options)
-    {
-        writer.WriteNumberValue(value.Value);
-    }
-}

@@ -39,4 +39,3 @@ public record struct MapPlacementsRequest
         return GetScore((MedalType)medalAsInt);
     }
 }
-   

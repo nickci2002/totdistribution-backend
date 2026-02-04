@@ -1,7 +1,6 @@
 using ManiaAPI.NadeoAPI;
 using Serilog;
 using System.Collections.Immutable;
-using System.Text.Json;
 using TOTDistribution.NadeoRefinery.NadeoApi.Records;
 
 namespace TOTDistribution.NadeoRefinery.NadeoApi;

@@ -1,25 +1,14 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using TOTDistribution.Shared.JsonConverters;
 
 namespace TOTDistribution.Shared;
 
-public readonly record struct PlayerGuid
+[JsonConverter(typeof(PrimitiveConverter<PlayerGuid, Guid>))]
+public readonly record struct PlayerGuid : IPrimitiveType<Guid>
 {
     public Guid Value { get; init; }
     
-    public static implicit operator PlayerGuid(Guid value) => new PlayerGuid { Value = value };
-}
-
-public class PlayerGuidConverter : JsonConverter<PlayerGuid>
-{
-    public override PlayerGuid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        Guid value = reader.GetGuid();
-        return new PlayerGuid { Value = value };
-    }
-
-    public override void Write(Utf8JsonWriter writer, PlayerGuid value, JsonSerializerOptions options)
-    {
-        writer.WriteStringValue(value.Value);
-    }
+    public static implicit operator PlayerGuid(Guid value) => new() { Value = value };
+    public static implicit operator PlayerGuid(Guid? value) => new() { Value = value ?? Guid.Empty };
+    
 }

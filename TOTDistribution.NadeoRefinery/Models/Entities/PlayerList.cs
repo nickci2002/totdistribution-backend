@@ -2,12 +2,9 @@ using Redis.OM.Modeling;
 
 namespace TOTDistribution.NadeoRefinery.Entities;
 
-[Document(Prefixes = new[] { "totd:distribution" })]
-public class Distribution
+[Document(Prefixes = new[] { "players" })]
+public class PlayerList
 {
-    /// <summary>
-    /// Format YYYYMMDD where DD is the TOTD day (changes at 19:00 RST)
-    /// </summary>
     [RedisIdField]
     [Indexed]
     public int Id { get; set; }
