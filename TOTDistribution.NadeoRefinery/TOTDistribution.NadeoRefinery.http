@@ -1,6 +1,18 @@
 @TOTDistribution.WebApi_HostAddress = http://localhost:5124
 
-GET {{TOTDistribution.WebApi_HostAddress}}/totd/
+GET {{TOTDistribution.WebApi_HostAddress}}/totd/obtain
 Accept: application/json
 
 ###
+
+POST {{TOTDistribution.WebApi_HostAddress}}/totd/get-distribution
+Content-Type: application/json
+
+{
+    "mapUid": "mXsBVAhbdiDr5VZ4AtPu6H6F2j8",
+    "groupUid": "13134540-a24f-4a14-896f-0347e37d952b",
+    "authorScore": 40821,
+    "goldScore": 44000,
+    "silverScore": 49000,
+    "bronzeScore": 83000
+}

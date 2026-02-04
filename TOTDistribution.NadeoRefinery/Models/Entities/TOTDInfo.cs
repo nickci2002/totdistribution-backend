@@ -10,6 +10,8 @@ namespace TOTDistribution.NadeoRefinery.Entities;
 public class TOTDInfo
 {
     [RedisIdField]
+    public int Id { get; set; }
+
     [Indexed]
     public string MapUid { get; set; } = string.Empty;
 

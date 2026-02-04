@@ -1,6 +1,5 @@
-﻿using TOTDistribution.NadeoRefinery.Data;
-using TOTDistribution.NadeoRefinery.Services;
-using Serilog;
+﻿using Serilog;
+using TOTDistribution.NadeoRefinery.Extensions;
 using TOTDistribution.Shared;
 
 namespace TOTDistribution.NadeoRefinery;
@@ -16,8 +15,11 @@ public static class DependencyInjection
 
         services.ConfigureHttpJsonOptions(options =>
         {
-            options.SerializerOptions.Converters.Add(new MapGuidConverter());
-            options.SerializerOptions.Converters.Add(new PlayerGuidConverter());
+            var converters = options.SerializerOptions.Converters;
+            converters.Add(new MapGuidConverter());
+            converters.Add(new MedalScoreConverter());
+            converters.Add(new PlayerGuidConverter());
+
         });
 
         services.AddRedisDb(config.GetSection("Redis"));
@@ -28,5 +30,4 @@ public static class DependencyInjection
     {
         host.AddSerilog();
     }
-
 }

@@ -1,10 +1,7 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using TOTDistribution.NadeoRefinery.Entities;
 using Redis.OM;
+using TOTDistribution.NadeoRefinery.Entities;
 
-namespace TOTDistribution.NadeoRefinery.Data;
+namespace TOTDistribution.NadeoRefinery.Extensions;
 
 public static class RedisServices
 {
@@ -34,6 +31,7 @@ public static class RedisServices
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await _provider.Connection.CreateIndexAsync(typeof(TOTDInfo));
+            await _provider.Connection.CreateIndexAsync(typeof(Distribution));
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

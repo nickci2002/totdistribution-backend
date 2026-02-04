@@ -1,6 +1,6 @@
 using Serilog;
 
-namespace TOTDistribution.NadeoRefinery.Services;
+namespace TOTDistribution.NadeoRefinery.Extensions;
 
 public static class SerilogServices
 {
