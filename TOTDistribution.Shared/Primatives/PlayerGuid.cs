@@ -10,5 +10,4 @@ public readonly record struct PlayerGuid : IPrimitiveType<Guid>
     
     public static implicit operator PlayerGuid(Guid value) => new() { Value = value };
     public static implicit operator PlayerGuid(Guid? value) => new() { Value = value ?? Guid.Empty };
-    
 }

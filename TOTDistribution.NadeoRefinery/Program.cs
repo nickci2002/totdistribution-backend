@@ -1,12 +1,13 @@
+using System.Reflection;
 using Serilog;
 using TOTDistribution.NadeoRefinery;
 using TOTDistribution.NadeoRefinery.Extensions;
 using TOTDistribution.NadeoRefinery.Features.Queries;
 
+#if WEB_API
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddNadeoRefinery();
-builder.Services.AddTestingEndpoints();
 
 builder.Services.AddTransient<ObtainCurrentTOTDInfo>();
 builder.Services.AddTransient<GetTOTDDistribution>();
@@ -16,7 +17,6 @@ builder.Services.AddTransient<GetTOTDDistribution>();
 builder.Services.AddOpenApi();
 
 builder.Host.AddHost();
-//onfigureHostBuilder
 
 var app = builder.Build();
 
@@ -33,3 +33,11 @@ app.UseSerilogRequestLogging();
 app.MapTestingEndpoints();
 
 app.Run();
+
+#elif WORKER
+
+var builder = Host.CreateApplicationBuilder();
+
+#else
+
+#endif

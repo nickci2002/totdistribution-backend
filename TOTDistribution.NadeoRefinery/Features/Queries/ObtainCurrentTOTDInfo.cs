@@ -9,7 +9,8 @@ using TOTDistribution.NadeoRefinery.NadeoApi;
 
 namespace TOTDistribution.NadeoRefinery.Features.Queries;
 
-public sealed class ObtainCurrentTOTDInfo : INadeoQuery<TOTDInfo>
+/// <inheritdoc cref="INadeoQuerySlice{TResp}">
+public sealed class ObtainCurrentTOTDInfo : INadeoQuerySlice<TOTDInfo>
 {
     /// <inheritdoc cref="IConsumer{TResp}"/>
     internal sealed class Consumer : IConsumer<TOTDInfo>
@@ -39,11 +40,9 @@ public sealed class ObtainCurrentTOTDInfo : INadeoQuery<TOTDInfo>
             var totdInfo = await _nadeoLiveServices.GetMapInfoAsync(totdMapUid);
             Debug.Assert(totdInfo is not null, $"The map {totdMapUid} does not exist");
 
-            //return new MapInfoLiveWithSeasonGuid(totdInfo, totdSeasonGuid);
-
             return new TOTDInfo
             {
-                Id = TOTDDayFinder.CreateTOTDDayId(),
+                Id = TOTDDayFinder.CreateRedisTOTDIdKey(),
                 MapUid = totdInfo.Uid,
                 MapGuid = totdInfo.MapId,
                 SeasonGuid = totdSeasonGuid,
@@ -56,7 +55,7 @@ public sealed class ObtainCurrentTOTDInfo : INadeoQuery<TOTDInfo>
                 BronzeTime = totdInfo.BronzeTime,
                 UploadTimestamp = totdInfo.UploadTimestamp,
                 UpdateTimestamp = totdInfo.UpdateTimestamp,
-                ThumbnailUrl = new Uri(totdInfo.ThumbnailUrl)
+                ThumbnailUrl = totdInfo.ThumbnailUrl
             };
         }
     }

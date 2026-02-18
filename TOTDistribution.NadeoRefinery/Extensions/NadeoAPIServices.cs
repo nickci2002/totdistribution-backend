@@ -13,16 +13,12 @@ public static class NadeoAPIServices
             config.GetValue<string>("Password")!,
             AuthorizationMethod.UbisoftAccount);
 
-        var userAgent = config.GetValue<string>("UserAgent")!;
-        
-        // services.AddNadeoAPI(credentials, userAgent, typeof(NadeoServices));
-        // services.AddNadeoAPI(credentials, userAgent, typeof(NadeoLiveServices));
-        // services.AddNadeoAPI(credentials, userAgent, typeof(ExtendedNadeoLiveServices));
         services.AddKeyedSingleton(nameof(NadeoServices),
                                    new NadeoAPIHandler { PendingCredentials = credentials });
         services.AddKeyedSingleton(nameof(NadeoLiveServices),
                                    new NadeoAPIHandler { PendingCredentials = credentials });
 
+        var userAgent = config.GetValue<string>("UserAgent")!;
         services.AddHttpClient<NadeoServices>().ConfigureHttpClient((client) =>
             client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent));
         services.AddHttpClient<ExtendedNadeoLiveServices>().ConfigureHttpClient((client) =>
@@ -34,18 +30,5 @@ public static class NadeoAPIServices
         services.AddTransient(provider => new ExtendedNadeoLiveServices(
             provider.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(ExtendedNadeoLiveServices)),
             provider.GetRequiredKeyedService<NadeoAPIHandler>(nameof(NadeoLiveServices))));
-    }
-
-    public static void AddNadeoAPI(this IServiceCollection services, NadeoAPICredentials credentials, string userAgent, Type nadeoServiceType)
-    {
-        services.AddKeyedSingleton(nadeoServiceType.Name,
-                                   new NadeoAPIHandler { PendingCredentials = credentials });
-        
-        services.AddHttpClient(nadeoServiceType.Name).ConfigureHttpClient((client) =>
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent));
-
-        services.AddTransient(provider => Activator.CreateInstance(nadeoServiceType,
-            provider.GetRequiredService<IHttpClientFactory>().CreateClient(nadeoServiceType.Name),
-            provider.GetRequiredKeyedService<NadeoAPIHandler>(nadeoServiceType.Name))!);
     }
 }

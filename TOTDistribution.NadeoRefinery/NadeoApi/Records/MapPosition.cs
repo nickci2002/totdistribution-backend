@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace TOTDistribution.NadeoRefinery.NadeoApi.Records;
 
-public sealed record MapPosition(string GroupUid,
-                                 string MapUid,
-                                 int Score,
-                                 ImmutableList<SeasonPlayerRankingZone> Zones);
+public sealed record Position(string GroupUid,
+                              string MapUid,
+                              int Score,
+                              ImmutableList<SeasonPlayerRankingZone> Zones);

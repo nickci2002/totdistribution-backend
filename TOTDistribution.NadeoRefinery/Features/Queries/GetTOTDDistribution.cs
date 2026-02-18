@@ -12,8 +12,8 @@ using TOTDistribution.Shared;
 
 namespace TOTDistribution.NadeoRefinery.Features.Queries;
 
-/// <inheritdoc cref="INadeoQuery{TReq, TResp}">
-public sealed class GetTOTDDistribution : INadeoQuery<MapPlacementsRequest, Distribution>
+/// <inheritdoc cref="INadeoQuerySlice{TReq, TResp}">
+public sealed class GetTOTDDistribution : INadeoQuerySlice<MapPlacementsRequest, Distribution>
 {
     /// <inheritdoc cref="IConsumer{TReq, TResp}">
     internal sealed class Consumer : IConsumer<MapPlacementsRequest, Distribution>
@@ -38,8 +38,9 @@ public sealed class GetTOTDDistribution : INadeoQuery<MapPlacementsRequest, Dist
             {
                 var score = request.GetScore(i);
                 var position = (await _nadeoLiveServices
-                    .GetMapPositionByTimeAsync(mapUid, score, groupUid)).ElementAt(0);
-                positionList[i] = position.Zones.ElementAt(0).Ranking.Position - 1;
+                    .GetMapPositionByTimeAsync(mapUid, score, groupUid))
+                    .ElementAt(0);
+                positionList[i] = position.Zones[0].Ranking.Position - 1;
                 
                 Log.Debug("Position JSON: {Json}", JsonSerializer.Serialize(position));
             }
@@ -54,7 +55,7 @@ public sealed class GetTOTDDistribution : INadeoQuery<MapPlacementsRequest, Dist
 
             return new Distribution
             {
-                Id = TOTDDayFinder.CreateTOTDDayId(),
+                Id = TOTDDayFinder.CreateRedisTOTDIdKey(),
                 MapUid = mapUid,
                 GroupUid = groupUid,
                 AuthorCount = authorCount,

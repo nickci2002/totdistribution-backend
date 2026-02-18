@@ -1,24 +1,19 @@
+using static TOTDistribution.NadeoRefinery.Common.Utils.ParisianTimeHelper;
+
 namespace TOTDistribution.NadeoRefinery.Common.Utils;
 
 public static class TOTDDayFinder
 {
     public static int CalculateCurrentTOTDDay()
     {
-        return GetCurrentRSTDateTime().GetTOTDDayOfTheMonth();
+        return CurrentParisianDateTime.GetTOTDDayOfTheMonth();
     }
 
-    public static int CreateTOTDDayId()
+    public static int CreateRedisTOTDIdKey()
     {
-        DateTime date = GetCurrentRSTDateTime();
+        DateTime date = CurrentParisianDateTime;
         
         return date.Year * 10000 + date.Month * 100 + date.GetTOTDDayOfTheMonth();
-    }
-
-    private static DateTime GetCurrentRSTDateTime()
-    {
-        return TimeZoneInfo.ConvertTime(DateTime.Now,
-                                        TimeZoneInfo.Local,
-                                        TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time"));
     }
 
     private static int GetTOTDDayOfTheMonth(this DateTime date)

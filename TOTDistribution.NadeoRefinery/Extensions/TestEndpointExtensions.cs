@@ -1,21 +1,17 @@
+#if WEB_API
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 using TOTDistribution.NadeoRefinery.Common.Endpoints;
+using TOTDistribution.NadeoRefinery.Common.Extensions;
 
 namespace TOTDistribution.NadeoRefinery.Extensions;
 
 public static class NadeoRefineryTestEndpoints
 {
-    public static IServiceCollection AddTestingEndpoints(this IServiceCollection services)
+    public static IServiceCollection AddTestingEndpoints(
+        this IServiceCollection services, IEnumerable<TypeInfo> types)
     {
-        var endpointTypes = Assembly
-            .GetExecutingAssembly()
-            .DefinedTypes
-            .Where(type => type is { IsInterface: false, IsAbstract: false } &&
-                           type.IsAssignableTo(typeof(ITestableEndpoint)))
-            .Select(type => ServiceDescriptor.Transient(typeof(ITestableEndpoint), type))
-            .ToArray();
-
+        var endpointTypes = types.GetServiceSlicesAsArray(typeof(ITestableEndpoint));
         services.TryAddEnumerable(endpointTypes);
 
         return services;
@@ -32,3 +28,4 @@ public static class NadeoRefineryTestEndpoints
         return app;
     }
 }
+#endif

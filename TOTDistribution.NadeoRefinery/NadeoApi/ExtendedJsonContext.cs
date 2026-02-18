@@ -6,7 +6,7 @@ using TOTDistribution.NadeoRefinery.NadeoApi.Records;
 namespace TOTDistribution.NadeoRefinery.NadeoApi;
 
 [JsonSerializable(typeof(MapGroupIdCollection))]
-[JsonSerializable(typeof(ImmutableList<MapPosition>))]
+[JsonSerializable(typeof(ImmutableList<Position>))]
 [JsonSerializable(typeof(TopLeaderboardCollection))]
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 internal sealed partial class ExtendedJsonContext : JsonSerializerContext;

@@ -34,22 +34,26 @@ public class ExtendedNadeoLiveServices : NadeoLiveServices
     /// <param name="groupUid"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public virtual async Task<ImmutableList<MapPosition>> GetMapPositionsByTimeAsync(IEnumerable<string> mapUids,
-                                                                                     IEnumerable<int> scores,
-                                                                                     IEnumerable<string> groupUids,
-                                                                                     CancellationToken cancellationToken = default)
+    public virtual async Task<ImmutableList<Position>> GetMapPositionsByTimeAsync(IEnumerable<string> mapUids,
+                                                                                  IEnumerable<int> scores,
+                                                                                  IEnumerable<string> groupUids,
+                                                                                  CancellationToken cancellationToken = default)
     {
-        var body = new MapGroupIdCollection(
-            [.. mapUids.Zip(groupUids, (mapUid, groupUid) => new MapGroupId(mapUid, groupUid))]);
+        var body = new MapGroupIdCollection(mapUids
+            .Zip(groupUids, (mapUid, groupUid) =>
+                new MapGroupId(mapUid, groupUid))
+            .ToImmutableList());
         var jsonContent = JsonContent.Create(body, ExtendedJsonContext.Default.MapGroupIdCollection);
         var json = await jsonContent.ReadAsStringAsync(cancellationToken);
-
         Log.Debug("{Json}", json);
-        var queryParams = mapUids.Zip(scores, (mapUid, score) => $"scores[{mapUid}]={score}")
+        
+        var queryParams = mapUids
+            .Zip(scores, (mapUid, score) =>
+                $"scores[{mapUid}]={score}")
             .Aggregate((a, b) => $"{a}&{b}");
         
         return await PostJsonAsync($"token/leaderboard/group/map?{queryParams}", jsonContent, 
-            ExtendedJsonContext.Default.ImmutableListMapPosition, cancellationToken);
+            ExtendedJsonContext.Default.ImmutableListPosition, cancellationToken);
     }
 
     /// <summary>
@@ -61,10 +65,10 @@ public class ExtendedNadeoLiveServices : NadeoLiveServices
     /// <param name="groupUid"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public virtual async Task<ImmutableList<MapPosition>> GetMapPositionByTimeAsync(string mapUid,
-                                                                                    int score,
-                                                                                    string groupUid,
-                                                                                    CancellationToken cancellationToken = default)
+    public virtual async Task<ImmutableList<Position>> GetMapPositionByTimeAsync(string mapUid,
+                                                                                 int score,
+                                                                                 string groupUid,
+                                                                                 CancellationToken cancellationToken = default)
     {
         return await GetMapPositionsByTimeAsync([mapUid], [score], [groupUid], cancellationToken);
     }
