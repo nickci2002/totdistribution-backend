@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TOTDistribution.NadeoRefinery\TOTDistribution.NadeoRefinery.csproj" />
+    <ProjectReference Include="..\TOTDBackend.NadeoRefinery\TOTDBackend.NadeoRefinery.csproj" />
   </ItemGroup>
 
 </Project>

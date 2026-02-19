@@ -1,5 +1,5 @@
 # totdistribution-backend
-Backend for TM2020 Track of the Day statistics website written in .NET 10, VSA with a microservice.
+Backend for TM2020 Track of the Day statistics website written in .NET 10.
 This project is being actively worked on as a full-stack solution with plans to deploy to the Azure cloud.
 
 ## Tools
@@ -9,5 +9,5 @@ This project is being actively worked on as a full-stack solution with plans to 
 
 ## Features
 There are two .NET projects in this solution:
-1. NadeoRefinery: A background service that communicates with Nadeo's servers to obtain necessary data and processes them for permanent storage in our main database. It runs on a set scheduler using the Quartz.NET scheduler and stores data temporarily in a Redis database.
-1. WebAPI: Our main backend that houses our SQL Server database for permanent storage. It will allow queries from our frontend and commands from our NadeoRefinery.
+1. NadeoRefinery: A background microservice, using VSA architecture, that communicates with Nadeo's servers to obtain necessary data and processes them for permanent storage in our main database. It runs on a set scheduler using the Quartz.NET scheduler and stores data temporarily in a Redis database.
+1. CoreWebAPI: Our main backend, using VSA architecture, that houses our SQL Server database for permanent storage. It will allow queries from our frontend and commands from our NadeoRefinery.
