@@ -5,6 +5,7 @@ using TOTDBackend.Shared.JsonConverters;
 using TOTDBackend.Shared.RabbitMQ;
 
 #if WEB_API
+// If implemented as a web project (for testing Nadeo API)
 var builder = WebApplication.CreateBuilder(args);
 
 var config = new ConfigurationBuilder()
@@ -43,9 +44,7 @@ app.MapTestingEndpoints();
 app.Run();
 
 #elif WORKER
-
+// If implemented as a worker service (for production)
 var builder = Host.CreateApplicationBuilder();
-
-#else
 
 #endif
