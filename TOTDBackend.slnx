@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="CoreWebApi/CoreWebApi.csproj" />
   <Project Path="NadeoRefinery/NadeoRefinery.csproj" />
+  <Project Path="RabbitMQClient/RabbitMQClient.csproj" />
   <Project Path="Shared/Shared.csproj" />
   <Project Path="TOTDistribution.Test/TOTDistribution.Test.csproj" />
 </Solution>

@@ -1,4 +1,3 @@
-#if WEB_API
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
@@ -28,4 +27,3 @@ public static class NadeoRefineryTestEndpoints
         return app;
     }
 }
-#endif

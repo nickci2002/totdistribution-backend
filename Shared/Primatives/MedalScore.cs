@@ -5,10 +5,8 @@ using TOTDBackend.Shared.JsonConverters;
 namespace TOTDBackend.Shared;
 
 [JsonConverter(typeof(PrimitiveConverter<MedalScore, int>))]
-public readonly record struct MedalScore : IPrimitiveType<int>
+public readonly record struct MedalScore(int Value) : IPrimitiveType<int>
 {
-    public int Value { get; init; }
-
     public static implicit operator MedalScore(TimeInt32 value) =>
         new() { Value = value.TotalMilliseconds };
 

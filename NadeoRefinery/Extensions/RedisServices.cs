@@ -1,37 +1,47 @@
 using Redis.OM;
+using StackExchange.Redis;
 using TOTDBackend.NadeoRefinery.Entities;
 
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
 public static class RedisServices
 {
-    public static void AddRedisDb(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddRedisDb(
+        this IServiceCollection services,
+        IConfiguration config)
     {
         services.AddHostedService<IndexCreationService>();
+        
+        // services.AddSingleton(sp =>
+        // {
+        //     var redisConnString = config.GetValue<string>("ConnectionString")!;
+        //     return ConnectionMultiplexer.Connect(redisConnString);
+        // });
+
+        // services.AddSingleton(sp =>
+        // {
+        //     var multiplexer = sp.GetRequiredService<ConnectionMultiplexer>();
+        //     return new RedisConnectionProvider(multiplexer);
+        // });
 
         services.AddSingleton(sp =>
         {
             var redisConnString = config.GetValue<string>("ConnectionString")!;
             return new RedisConnectionProvider(redisConnString);
         });
+
+        return services;
     }
 
     /// <summary>
     /// Helper service to create indeces for our RedisDB
     /// </summary>
-    internal class IndexCreationService : IHostedService
+    internal class IndexCreationService(RedisConnectionProvider provider) : IHostedService
     {
-        private readonly RedisConnectionProvider _provider;
-
-        public IndexCreationService(RedisConnectionProvider provider)
-        {
-            _provider = provider;
-        }
-        
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await _provider.Connection.CreateIndexAsync(typeof(TOTDInfo));
-            await _provider.Connection.CreateIndexAsync(typeof(Distribution));
+            await provider.Connection.CreateIndexAsync(typeof(TOTDInfo));
+            await provider.Connection.CreateIndexAsync(typeof(Distribution));
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

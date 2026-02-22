@@ -3,7 +3,7 @@ using TOTDBackend.Shared;
 
 namespace TOTDBackend.NadeoRefinery.Common.Requests;
 
-public record struct MapPlacementsRequest
+public readonly record struct MapPlacementsRequest
 {
     public string MapUid { get; init; }
     public string GroupUid { get; init; }
@@ -13,7 +13,6 @@ public record struct MapPlacementsRequest
     public int BronzeScore { get; init; }
     public readonly int NoneScore => int.MaxValue;
 
-    // 
     public readonly int GetScore(MedalType medal)
     {
         return medal switch

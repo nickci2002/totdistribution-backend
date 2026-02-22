@@ -1,30 +1,43 @@
+using System.Reflection;
 using Serilog;
-using TOTDBackend.NadeoRefinery;
 using TOTDBackend.NadeoRefinery.Extensions;
+using TOTDBackend.Shared.JsonConverters;
+using TOTDBackend.Shared.RabbitMQ;
 
 #if WEB_API
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.AddHost();
+var config = new ConfigurationBuilder()
+    .AddJsonFile("secrets.json")
+    .AddEnvironmentVariables()
+    .Build();
 
-builder.Services.AddNadeoRefinery();
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new CustomPrimitiveConverterFactory()));
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+var sliceTypes = Assembly
+    .GetExecutingAssembly()
+    .DefinedTypes
+    .Where((type) => type is { IsInterface: false, IsAbstract: false });
+
+builder.Services.AddRedisDb(config.GetSection("Redis"));
+builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
+builder.Services.AddNadeoQuerySlices();
+builder.Services.AddTestingEndpoints(sliceTypes);
+
+builder.Host.AddSerilog();
+
+builder.Services.AddHostedService(sp => 
+{
+    var logger = sp.GetRequiredService<ILogger<RabbitMqProducerBase>>();
+    return new RabbitMqProducerBase(logger, QueueNames.RefineryBackend);
+});
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
 
 app.UseHttpsRedirection();
 app.UseSerilogRequestLogging();
 
-// Endpoint Test
 app.MapTestingEndpoints();
 
 app.Run();

@@ -1,4 +1,3 @@
-using ManiaAPI.NadeoAPI;
 using Redis.OM;
 using Redis.OM.Searching;
 using Serilog;
@@ -14,18 +13,15 @@ using TOTDBackend.Shared;
 namespace TOTDBackend.NadeoRefinery.Features.Queries;
 
 /// <inheritdoc cref="INadeoQuerySlice{TReq, TResp}">
-public sealed class GetTOTDDistribution : INadeoQuerySlice<MapPlacementsRequest, Distribution>
+public sealed class GetTOTDDistribution(
+    ExtendedNadeoLiveServices liveServices,
+    RedisConnectionProvider provider)
+    : INadeoQuerySlice<MapPlacementsRequest, Distribution>
 {
     /// <inheritdoc cref="IConsumer{TReq, TResp}">
-    internal sealed class Consumer : IConsumer<MapPlacementsRequest, Distribution>
+    internal sealed class Consumer(ExtendedNadeoLiveServices nadeoLiveServices)
+        : IConsumer<MapPlacementsRequest, Distribution>
     {
-        private readonly ExtendedNadeoLiveServices _nadeoLiveServices;
-
-        internal Consumer(ExtendedNadeoLiveServices nadeoLiveServices)
-        {
-            _nadeoLiveServices = nadeoLiveServices;
-        }
-
         public async Task<Distribution> FetchData(MapPlacementsRequest request)
         {
             Log.Information("Fetching distribution data from Nadeo servers...");
@@ -38,7 +34,7 @@ public sealed class GetTOTDDistribution : INadeoQuerySlice<MapPlacementsRequest,
             for (int i = 0; i < numRequests; i++)
             {
                 var score = request.GetScore(i);
-                var position = (await _nadeoLiveServices
+                var position = (await nadeoLiveServices
                     .GetMapPositionByTimeAsync(mapUid, score, groupUid))
                     .ElementAt(0);
                 positionList[i] = position.Zones[0].Ranking.Position - 1;
@@ -69,16 +65,10 @@ public sealed class GetTOTDDistribution : INadeoQuerySlice<MapPlacementsRequest,
     }
 
     /// <inheritdoc cref="IRedisRepository{T}">
-    internal sealed class Repository : IRedisRepository<Distribution>
+    internal sealed class Repository(RedisConnectionProvider provider) : IRedisRepository<Distribution>
     {
-        private readonly RedisConnectionProvider _provider;
-        private readonly RedisCollection<Distribution> _collection;
-
-        internal Repository(RedisConnectionProvider provider)
-        {
-            _provider = provider;
-            _collection = (RedisCollection<Distribution>)_provider.RedisCollection<Distribution>();
-        }
+        private readonly RedisCollection<Distribution> _collection = 
+            (RedisCollection<Distribution>)provider.RedisCollection<Distribution>();
 
         public async Task<Distribution> RetrieveDataAsync(string key)
         {
@@ -105,14 +95,8 @@ public sealed class GetTOTDDistribution : INadeoQuerySlice<MapPlacementsRequest,
         }
     }
 
-    private Consumer consumer;
-    private Repository repository;
-
-    public GetTOTDDistribution(ExtendedNadeoLiveServices liveServices, RedisConnectionProvider provider)
-    {
-        consumer = new Consumer(liveServices);
-        repository = new Repository(provider);
-    }
+    private readonly Consumer consumer = new(liveServices);
+    private readonly Repository repository = new(provider);
 
     public async Task<Distribution> HandleAsync(MapPlacementsRequest request)
     {

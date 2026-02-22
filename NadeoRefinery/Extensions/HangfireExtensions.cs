@@ -4,7 +4,7 @@ namespace TOTDBackend.NadeoRefinery.Extensions;
 
 public static class HangfireExtensions
 {
-    public static void AddHangfireServices(this IServiceCollection services)
+    public static IServiceCollection AddHangfireServices(this IServiceCollection services)
     {
         services.AddHangfire(configuration => configuration
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -12,5 +12,7 @@ public static class HangfireExtensions
             .UseRecommendedSerializerSettings());
 
         services.AddHangfireServer();
+
+        return services;
     }
 }

@@ -10,21 +10,14 @@ using TOTDBackend.NadeoRefinery.NadeoApi;
 namespace TOTDBackend.NadeoRefinery.Features.Queries;
 
 /// <inheritdoc cref="INadeoQuerySlice{TResp}">
-public sealed class ObtainCurrentTOTDInfo : INadeoQuerySlice<TOTDInfo>
+public sealed class ObtainCurrentTOTDInfo(ExtendedNadeoLiveServices liveServices, RedisConnectionProvider provider) : INadeoQuerySlice<TOTDInfo>
 {
     /// <inheritdoc cref="IConsumer{TResp}"/>
-    internal sealed class Consumer : IConsumer<TOTDInfo>
+    internal sealed class Consumer(ExtendedNadeoLiveServices nadeoLiveServices) : IConsumer<TOTDInfo>
     {
-        private readonly ExtendedNadeoLiveServices _nadeoLiveServices;
-
-        internal Consumer(ExtendedNadeoLiveServices nadeoLiveServices)
-        {
-            _nadeoLiveServices = nadeoLiveServices;
-        }
-        
         public async Task<TOTDInfo> FetchData()
         {
-            var totdList = await _nadeoLiveServices.GetTrackOfTheDaysAsync(1, 0, false);
+            var totdList = await nadeoLiveServices.GetTrackOfTheDaysAsync(1, 0, false);
             Debug.Assert(totdList is not null, "Failed to retrieve TOTD list from Nadeo Live Services");
             Debug.Assert(totdList.MonthList.Any(), "No track of the days for the given month!");
 
@@ -37,7 +30,7 @@ public sealed class ObtainCurrentTOTDInfo : INadeoQuerySlice<TOTDInfo>
             Debug.Assert(totdSeasonGuid != Guid.Empty, "TOTD Season UID is null");
 
             var totdMapUid = totdCurrent.MapUid;
-            var totdInfo = await _nadeoLiveServices.GetMapInfoAsync(totdMapUid);
+            var totdInfo = await nadeoLiveServices.GetMapInfoAsync(totdMapUid);
             Debug.Assert(totdInfo is not null, $"The map {totdMapUid} does not exist");
 
             return new TOTDInfo
@@ -61,16 +54,10 @@ public sealed class ObtainCurrentTOTDInfo : INadeoQuerySlice<TOTDInfo>
     }
 
     /// <inheritdoc cref="IRedisRepository{T}"/>
-    internal sealed class Repository : IRedisRepository<TOTDInfo>
+    internal sealed class Repository(RedisConnectionProvider provider) : IRedisRepository<TOTDInfo>
     {
-        private readonly RedisConnectionProvider _provider;
-        private readonly RedisCollection<TOTDInfo> _collection;
-
-        internal Repository(RedisConnectionProvider provider)
-        {
-            _provider = provider;
-            _collection = (RedisCollection<TOTDInfo>)_provider.RedisCollection<TOTDInfo>();
-        }
+        private readonly RedisCollection<TOTDInfo> _collection = 
+            (RedisCollection<TOTDInfo>)provider.RedisCollection<TOTDInfo>();
 
         public async Task<TOTDInfo> RetrieveDataAsync(string key)
         {
@@ -95,15 +82,9 @@ public sealed class ObtainCurrentTOTDInfo : INadeoQuerySlice<TOTDInfo>
         }
     }
 
-    private Consumer consumer;
-    private Repository repository;
+    private readonly Consumer consumer = new(liveServices);
+    private readonly Repository repository = new(provider);
 
-    public ObtainCurrentTOTDInfo(ExtendedNadeoLiveServices liveServices, RedisConnectionProvider provider)
-    {
-        consumer = new Consumer(liveServices);
-        repository = new Repository(provider);
-    }
-    
     public async Task<TOTDInfo> HandleAsync()
     {
         var response = await consumer.FetchData();

@@ -6,7 +6,7 @@ namespace TOTDBackend.NadeoRefinery.Extensions;
 // Modified code from ManiaAPI.NadeoAPI.Extensions.Hosting NuGet package
 public static class NadeoAPIServices
 {
-    public static void AddNadeoAPIServices(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddNadeoAPIServices(this IServiceCollection services, IConfiguration config)
     {
         var credentials = new NadeoAPICredentials(
             config.GetValue<string>("Login")!,
@@ -30,5 +30,7 @@ public static class NadeoAPIServices
         services.AddTransient(provider => new ExtendedNadeoLiveServices(
             provider.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(ExtendedNadeoLiveServices)),
             provider.GetRequiredKeyedService<NadeoAPIHandler>(nameof(NadeoLiveServices))));
+        
+        return services;
     }
 }
