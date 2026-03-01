@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
-using TOTDBackend.Shared.JsonConverters;
+using TOTDBackend.Shared.Json;
 
-namespace TOTDBackend.Shared;
+namespace TOTDBackend.Shared.Primatives;
 
-[JsonConverter(typeof(PrimitiveConverter<PlayerGuid, Guid>))]
+[JsonConverter(typeof(PrimitiveJsonConverter<PlayerGuid, Guid>))]
 public readonly record struct PlayerGuid(Guid Value) : IPrimitiveType<Guid>
 {
     public static implicit operator PlayerGuid(Guid value) => new() { Value = value };

@@ -1,7 +1,6 @@
 using System.Reflection;
 using Serilog;
 using TOTDBackend.NadeoRefinery.Extensions;
-using TOTDBackend.Shared.JsonConverters;
 using TOTDBackend.Shared.RabbitMQ;
 
 #if WEB_API
@@ -13,8 +12,7 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-builder.Services.ConfigureHttpJsonOptions(options =>
-    options.SerializerOptions.Converters.Add(new CustomPrimitiveConverterFactory()));
+builder.Services.ConfigureJsonProperties();
 
 var sliceTypes = Assembly
     .GetExecutingAssembly()
@@ -28,11 +26,11 @@ builder.Services.AddTestingEndpoints(sliceTypes);
 
 builder.Host.AddSerilog();
 
-builder.Services.AddHostedService(sp => 
-{
-    var logger = sp.GetRequiredService<ILogger<RabbitMqProducerBase>>();
-    return new RabbitMqProducerBase(logger, QueueNames.RefineryBackend);
-});
+// builder.Services.AddHostedService(sp => 
+// {
+//     var logger = sp.GetRequiredService<ILogger<RabbitMQPublisherBase<int>>>();
+//     return new RabbitMQPublisherBase(logger, QueueNames.RefineryBackend);
+// });
 
 var app = builder.Build();
 

@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
-using TOTDBackend.Shared.JsonConverters;
+using TOTDBackend.Shared.Json;
 
-namespace TOTDBackend.Shared;
+namespace TOTDBackend.Shared.Primatives;
 
-[JsonConverter(typeof(PrimitiveConverter<MapUid, string>))]
+[JsonConverter(typeof(PrimitiveJsonConverter<MapUid, string>))]
 public readonly record struct MapUid(string Value) : IPrimitiveType<string>
 {
     public static implicit operator MapUid(string value) => new() { Value = value ?? string.Empty };

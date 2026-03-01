@@ -1,5 +1,5 @@
 using Redis.OM.Modeling;
-using TOTDBackend.Shared;
+using TOTDBackend.Shared.Primatives;
 
 namespace TOTDBackend.NadeoRefinery.Entities;
 

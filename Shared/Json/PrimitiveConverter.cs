@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TOTDBackend.Shared.JsonConverters;
+namespace TOTDBackend.Shared.Json;
 
-public class PrimitiveConverter<TPrimitive, TValue> : JsonConverter<TPrimitive>
+public class PrimitiveJsonConverter<TPrimitive, TValue> : JsonConverter<TPrimitive>
     where TPrimitive : IPrimitiveType<TValue>, new()
 {
     public override TPrimitive Read(ref Utf8JsonReader reader,

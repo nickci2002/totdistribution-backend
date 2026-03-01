@@ -7,18 +7,18 @@ public interface ITestableEndpoint
 
 // Empty implementation of Web project packages to satisfy the compiler
 #if !WEB_API
-public interface IEndpointRouteBuilder;
+internal interface IEndpointRouteBuilder;
 
-public static class EmptyEndpointExtensions
+internal static class EmptyEndpointExtensions
 {
-    public static void MapGet(
+    internal static void MapGet(
         this IEndpointRouteBuilder endpoints,
         string pattern,
         Delegate requestDelegate)
     {    
     }
 
-    public static void MapPost(
+    internal static void MapPost(
         this IEndpointRouteBuilder endpoints,
         string pattern,
         Delegate requestDelegate)

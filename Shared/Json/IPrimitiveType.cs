@@ -1,4 +1,4 @@
-namespace TOTDBackend.Shared;
+namespace TOTDBackend.Shared.Json;
 
 /// <summary>
 /// Interface for ALL primitives.

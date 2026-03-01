@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Redis.OM;
-using Redis.OM.Searching;
+using Serilog;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
 using TOTDBackend.NadeoRefinery.Common.Features;
 using TOTDBackend.NadeoRefinery.Common.Utils;
@@ -9,29 +9,41 @@ using TOTDBackend.NadeoRefinery.NadeoApi;
 
 namespace TOTDBackend.NadeoRefinery.Features.Queries;
 
-/// <inheritdoc cref="INadeoQuerySlice{TResp}">
-public sealed class ObtainCurrentTOTDInfo(ExtendedNadeoLiveServices liveServices, RedisConnectionProvider provider) : INadeoQuerySlice<TOTDInfo>
+/// <inheritdoc cref="NadeoSlice{TResp}" />
+internal sealed class ObtainCurrentTOTDInfo(
+    ExtendedNadeoLiveServices liveServices,
+    RedisConnectionProvider provider)
+    : NadeoSlice<TOTDInfo>
 {
-    /// <inheritdoc cref="IConsumer{TResp}"/>
-    internal sealed class Consumer(ExtendedNadeoLiveServices nadeoLiveServices) : IConsumer<TOTDInfo>
+    /// <inheritdoc cref="NadeoConsumerComponent{TResp}" />
+    internal sealed class Consumer(ExtendedNadeoLiveServices nadeoLiveServices)
+        : NadeoConsumerComponent<TOTDInfo>
     {
-        public async Task<TOTDInfo> FetchData()
+        public override async Task<TOTDInfo> FetchData()
         {
+            Log.Information("Fetching TOTD information from Nadeo servers...");
+
             var totdList = await nadeoLiveServices.GetTrackOfTheDaysAsync(1, 0, false);
+            // Bail out if certain conditions aren't met
             Debug.Assert(totdList is not null, "Failed to retrieve TOTD list from Nadeo Live Services");
-            Debug.Assert(totdList.MonthList.Any(), "No track of the days for the given month!");
+            Debug.Assert(!totdList.MonthList.IsEmpty, "No track of the days for the given month!");
 
             var totdDay = TOTDDayFinder.CalculateCurrentTOTDDay();
             var totdCurrent = totdList.MonthList[0].Days[totdDay - 1];
+            // Bail out if certain conditions aren't met
             Debug.Assert(totdCurrent is not null, 
                          "There is no TOTD for {dateNow.Day}/{dateNow.Month}/{dateNow.Year}");
             
             var totdSeasonGuid = totdCurrent.SeasonUid;
+            // Bail out if certain conditions aren't met
             Debug.Assert(totdSeasonGuid != Guid.Empty, "TOTD Season UID is null");
 
             var totdMapUid = totdCurrent.MapUid;
             var totdInfo = await nadeoLiveServices.GetMapInfoAsync(totdMapUid);
+            // Bail out if certain conditions aren't met
             Debug.Assert(totdInfo is not null, $"The map {totdMapUid} does not exist");
+
+            Log.Information("Finished fetching TOTD information!");
 
             return new TOTDInfo
             {
@@ -53,24 +65,22 @@ public sealed class ObtainCurrentTOTDInfo(ExtendedNadeoLiveServices liveServices
         }
     }
 
-    /// <inheritdoc cref="IRedisRepository{T}"/>
-    internal sealed class Repository(RedisConnectionProvider provider) : IRedisRepository<TOTDInfo>
+    /// <inheritdoc cref="RedisRepositoryComponent{T}" />
+    internal sealed class Repository(RedisConnectionProvider provider)
+        : RedisRepositoryComponent<TOTDInfo>(provider)
     {
-        private readonly RedisCollection<TOTDInfo> _collection = 
-            (RedisCollection<TOTDInfo>)provider.RedisCollection<TOTDInfo>();
-
-        public async Task<TOTDInfo> RetrieveDataAsync(string key)
+        public override async Task<TOTDInfo> RetrieveDataAsync(string key)
         {
             throw new NotImplementedException();
         }
 
-        public async Task StoreDataAsync(TOTDInfo data, TimeSpan? expiry = null)
+        public override async Task StoreDataAsync(TOTDInfo data, TimeSpan? expiry = null)
         {
             await _collection.InsertAsync(data, WhenKey.Always, expiry);
         }
     }
 
-    /// <inheritdoc cref="ITestableEndpoint"/>
+    /// <inheritdoc cref="ITestableEndpoint" />
     public sealed class TestEndpoint : ITestableEndpoint
     {
         public void MapTestingEndpoint(IEndpointRouteBuilder app)
@@ -82,14 +92,6 @@ public sealed class ObtainCurrentTOTDInfo(ExtendedNadeoLiveServices liveServices
         }
     }
 
-    private readonly Consumer consumer = new(liveServices);
-    private readonly Repository repository = new(provider);
-
-    public async Task<TOTDInfo> HandleAsync()
-    {
-        var response = await consumer.FetchData();
-        await repository.StoreDataAsync(response);
-
-        return response;
-    }
+    protected override Consumer ConsumerComponent => new(liveServices);
+    protected override Repository RepositoryComponent => new(provider);
 }

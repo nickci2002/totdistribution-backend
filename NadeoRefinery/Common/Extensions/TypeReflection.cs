@@ -1,6 +1,7 @@
 using System.Reflection;
 
 namespace TOTDBackend.NadeoRefinery.Common.Extensions;
+
 public static class TypeReflection
 {
     public static ServiceDescriptor[] GetServiceSlicesAsArray(

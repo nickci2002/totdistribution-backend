@@ -2,10 +2,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TOTDBackend.Shared.JsonConverters;
+namespace TOTDBackend.Shared.Json;
 
-public sealed class CustomPrimitiveConverterFactory
-    : JsonConverterFactory
+public sealed class CustomPrimitiveConverterFactory : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert)
     {
@@ -13,13 +12,12 @@ public sealed class CustomPrimitiveConverterFactory
     }
 
     public override JsonConverter CreateConverter(
-        Type typeToConvert,
-        JsonSerializerOptions options)
+        Type typeToConvert, JsonSerializerOptions options)
     {
         var primitiveInterface = GetCustomPrimitiveInterface(typeToConvert)!;
         var valueType = primitiveInterface.GetGenericArguments()[0];
 
-        var converterType = typeof(PrimitiveConverter<,>)
+        var converterType = typeof(PrimitiveJsonConverter<,>)
             .MakeGenericType(typeToConvert, valueType);
 
         return (JsonConverter)Activator.CreateInstance(converterType)!;

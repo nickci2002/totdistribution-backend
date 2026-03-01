@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using TOTDBackend.Shared;
+using TOTDBackend.Shared.Primatives;
 
 namespace TOTDBackend.NadeoRefinery.Common.Requests;
 

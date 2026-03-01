@@ -1,10 +1,10 @@
 using System.Text.Json.Serialization;
 using TmEssentials;
-using TOTDBackend.Shared.JsonConverters;
+using TOTDBackend.Shared.Json;
 
-namespace TOTDBackend.Shared;
+namespace TOTDBackend.Shared.Primatives;
 
-[JsonConverter(typeof(PrimitiveConverter<MedalScore, int>))]
+[JsonConverter(typeof(PrimitiveJsonConverter<MedalScore, int>))]
 public readonly record struct MedalScore(int Value) : IPrimitiveType<int>
 {
     public static implicit operator MedalScore(TimeInt32 value) =>

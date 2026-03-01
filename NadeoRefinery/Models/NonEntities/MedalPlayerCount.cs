@@ -1,5 +1,5 @@
 
-using TOTDBackend.Shared;
+using TOTDBackend.Shared.Primatives;
 
 namespace TOTDBackend.NadeoRefinery.Models.NonEntities;
 

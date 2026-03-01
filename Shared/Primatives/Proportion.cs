@@ -1,4 +1,4 @@
-namespace TOTDBackend.Shared;
+namespace TOTDBackend.Shared.Primatives;
 
 // Same as a percentage divided by 100
 public readonly record struct Proportion

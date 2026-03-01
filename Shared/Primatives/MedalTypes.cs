@@ -1,4 +1,4 @@
-namespace TOTDBackend.Shared;
+namespace TOTDBackend.Shared.Primatives;
 
 /// <summary>
 /// Custom type to represent medal types.<br/>

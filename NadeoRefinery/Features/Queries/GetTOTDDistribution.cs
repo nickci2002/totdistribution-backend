@@ -1,28 +1,26 @@
 using Redis.OM;
-using Redis.OM.Searching;
 using Serilog;
-using System.Text.Json;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
 using TOTDBackend.NadeoRefinery.Common.Features;
 using TOTDBackend.NadeoRefinery.Common.Requests;
 using TOTDBackend.NadeoRefinery.Common.Utils;
 using TOTDBackend.NadeoRefinery.Entities;
 using TOTDBackend.NadeoRefinery.NadeoApi;
-using TOTDBackend.Shared;
+using TOTDBackend.Shared.Primatives;
 
 namespace TOTDBackend.NadeoRefinery.Features.Queries;
 
-/// <inheritdoc cref="INadeoQuerySlice{TReq, TResp}">
-public sealed class GetTOTDDistribution(
+/// <inheritdoc cref="INadeoSlice{TReq, TResp}" />
+internal sealed class GetTOTDDistribution(
     ExtendedNadeoLiveServices liveServices,
     RedisConnectionProvider provider)
-    : INadeoQuerySlice<MapPlacementsRequest, Distribution>
+    : NadeoSlice<MapPlacementsRequest, Distribution>
 {
-    /// <inheritdoc cref="IConsumer{TReq, TResp}">
+    /// <inheritdoc cref="NadeoConsumerComponent{TReq, TResp}" />
     internal sealed class Consumer(ExtendedNadeoLiveServices nadeoLiveServices)
-        : IConsumer<MapPlacementsRequest, Distribution>
+        : NadeoConsumerComponent<MapPlacementsRequest, Distribution>
     {
-        public async Task<Distribution> FetchData(MapPlacementsRequest request)
+        public override async Task<Distribution> FetchData(MapPlacementsRequest request)
         {
             Log.Information("Fetching distribution data from Nadeo servers...");
             
@@ -38,8 +36,6 @@ public sealed class GetTOTDDistribution(
                     .GetMapPositionByTimeAsync(mapUid, score, groupUid))
                     .ElementAt(0);
                 positionList[i] = position.Zones[0].Ranking.Position - 1;
-                
-                Log.Debug("Position JSON: {Json}", JsonSerializer.Serialize(position));
             }
 
             Log.Information("Finished fetching distribution data!");
@@ -64,24 +60,22 @@ public sealed class GetTOTDDistribution(
         }
     }
 
-    /// <inheritdoc cref="IRedisRepository{T}">
-    internal sealed class Repository(RedisConnectionProvider provider) : IRedisRepository<Distribution>
+    /// <inheritdoc cref="RedisRepositoryComponent{T}" />
+    internal sealed class Repository(RedisConnectionProvider provider)
+        : RedisRepositoryComponent<Distribution>(provider)
     {
-        private readonly RedisCollection<Distribution> _collection = 
-            (RedisCollection<Distribution>)provider.RedisCollection<Distribution>();
-
-        public async Task<Distribution> RetrieveDataAsync(string key)
+        public override async Task<Distribution> RetrieveDataAsync(string key)
         {
             throw new NotImplementedException();
         }
 
-        public async Task StoreDataAsync(Distribution data, TimeSpan? expiry = null)
+        public override async Task StoreDataAsync(Distribution data, TimeSpan? expiry = null)
         {
             await _collection.InsertAsync(data, WhenKey.Always, expiry);
         }
     }
 
-    /// <inheritdoc cref="ITestableEndpoint">
+    /// <inheritdoc cref="ITestableEndpoint" />
     public sealed class TestEndpoint : ITestableEndpoint
     {
         public void MapTestingEndpoint(IEndpointRouteBuilder app)
@@ -95,14 +89,6 @@ public sealed class GetTOTDDistribution(
         }
     }
 
-    private readonly Consumer consumer = new(liveServices);
-    private readonly Repository repository = new(provider);
-
-    public async Task<Distribution> HandleAsync(MapPlacementsRequest request)
-    {
-        var response = await consumer.FetchData(request);
-        await repository.StoreDataAsync(response);
-
-        return response;
-    }
+    protected override Consumer ConsumerComponent => new(liveServices);
+    protected override Repository RepositoryComponent => new(provider);
 }
