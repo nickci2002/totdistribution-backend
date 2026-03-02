@@ -21,7 +21,7 @@ var sliceTypes = Assembly
 
 builder.Services.AddRedisDb(config.GetSection("Redis"));
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
-builder.Services.AddNadeoQuerySlices();
+builder.Services.AddNadeoQuerySlices(sliceTypes);
 builder.Services.AddTestingEndpoints(sliceTypes);
 
 builder.Host.AddSerilog();
