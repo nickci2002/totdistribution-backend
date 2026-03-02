@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Redis.OM;
+using Redis.OM.Searching;
 using Serilog;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
 using TOTDBackend.NadeoRefinery.Common.Features;
@@ -7,19 +9,19 @@ using TOTDBackend.NadeoRefinery.Common.Utils;
 using TOTDBackend.NadeoRefinery.Entities;
 using TOTDBackend.NadeoRefinery.NadeoApi;
 
-namespace TOTDBackend.NadeoRefinery.Features.Queries;
+namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
 /// <inheritdoc cref="NadeoSlice{TResp}" />
 internal sealed class ObtainCurrentTOTDInfo(
     ExtendedNadeoLiveServices liveServices,
     RedisConnectionProvider provider)
-    : NadeoSlice<TOTDInfo>
+    : NadeoSliceWithStorage<TOTDInfo>
 {
-    /// <inheritdoc cref="NadeoConsumerComponent{TResp}" />
+    /// <inheritdoc cref="INadeoConsumerComponent{TResp}" />
     internal sealed class Consumer(ExtendedNadeoLiveServices nadeoLiveServices)
-        : NadeoConsumerComponent<TOTDInfo>
+        : INadeoConsumerComponent<TOTDInfo>
     {
-        public override async Task<TOTDInfo> FetchData()
+        public async Task<TOTDInfo> FetchDataAsync()
         {
             Log.Information("Fetching TOTD information from Nadeo servers...");
 
@@ -65,18 +67,48 @@ internal sealed class ObtainCurrentTOTDInfo(
         }
     }
 
-    /// <inheritdoc cref="RedisRepositoryComponent{T}" />
+    /// <inheritdoc cref="IRedisRepositoryComponent{T}" />
     internal sealed class Repository(RedisConnectionProvider provider)
-        : RedisRepositoryComponent<TOTDInfo>(provider)
+        : IRedisRepositoryComponent<TOTDInfo>
     {
-        public override async Task<TOTDInfo> RetrieveDataAsync(string key)
-        {
-            throw new NotImplementedException();
-        }
+        private readonly RedisCollection<TOTDInfo> _collection =
+            (RedisCollection<TOTDInfo>)provider.RedisCollection<Distribution>();
 
-        public override async Task StoreDataAsync(TOTDInfo data, TimeSpan? expiry = null)
+        public async Task StoreDataAsync(TOTDInfo data, TimeSpan? expiry = null)
         {
+            var totdId = data.Id;
+            Log.Information("Storing data with key {} into the Redis database...", totdId);
+            Log.Debug("Value found: {}", JsonSerializer.Serialize(data));
+            
             await _collection.InsertAsync(data, WhenKey.Always, expiry);
+
+            Log.Information("Successfully stored data with key {}!", totdId);
+        }
+        
+        public TOTDInfo RetrieveData(string key)
+        {
+            Log.Information("Retrieving information for type {} with value {}...", nameof(TOTDInfo), key);
+
+            _collection.FindById(key);
+            if (!int.TryParse(key, out var keyAsInt))
+            {
+                Log.Error("{} is not a valid key! Cancelling search...");
+                return TOTDInfo.Empty;
+            }
+
+            var redisEntry = _collection.Where(x => x.Id == keyAsInt).FirstOrDefault(TOTDInfo.Empty);
+
+            if (redisEntry == TOTDInfo.Empty)
+            {
+                Log.Error("Key {} was not found in the Redis database!", key);
+            }
+            else
+            {
+                Log.Information("Found data with key {}!", key);
+                Log.Debug("Value found: {}", JsonSerializer.Serialize(redisEntry));
+            }
+            
+            return redisEntry;
         }
     }
 
@@ -87,7 +119,7 @@ internal sealed class ObtainCurrentTOTDInfo(
         {
             app.MapGet("/totd/obtain", async (ObtainCurrentTOTDInfo query) => 
             {
-                return await query.HandleAsync();
+                return await query.HandleConsumeAndStorageAsync();
             });
         }
     }

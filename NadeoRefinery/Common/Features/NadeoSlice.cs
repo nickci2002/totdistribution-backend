@@ -7,7 +7,7 @@ namespace TOTDBackend.NadeoRefinery.Common.Features;
 /// <typeparam name="TResp">The return type</typeparam>
 internal interface INadeoSlice<TResp>
 {
-    Task<TResp> HandleAsync();
+    Task<TResp> HandleConsumeAsync();
 }
 
 /// <inheritdoc cref="INadeoSlice{TResp}>" />
@@ -16,38 +16,24 @@ internal abstract class NadeoSlice<TResp>
     where TResp : notnull
 {
     protected abstract INadeoConsumerComponent<TResp> ConsumerComponent { get; }
-    protected abstract RedisRepositoryComponent<TResp>? RepositoryComponent { get; }
 
-    public async Task<TResp> HandleAsync()
+    public async Task<TResp> HandleConsumeAsync()
     {
-        if (ConsumerComponent is null)
-        {
-            throw new ArgumentNullException("The Consumer Component cannot be null");
-        }
+        ArgumentNullException.ThrowIfNull(ConsumerComponent);
 
-        var response = await ConsumerComponent.FetchData();
-        
-        if (RepositoryComponent is not null)
-        {
-            await RepositoryComponent.StoreDataAsync(response);
-        }
-
-        return response;
+        return await ConsumerComponent.FetchDataAsync();
     }
-
-    Task<TResp> INadeoSlice<TResp>.HandleAsync() => HandleAsync();
 }
 
 /// <summary>
-/// A vertical slice that takes input of type <typeparamref name="TReq"/> and retrieves query data
-/// for processing.<br/>
+/// A vertical slice that takes input of type <typeparamref name="TReq"/> and retrieves query data for processing.<br/>
 /// ALL DERIVED CLASSES SHOULD USE THE 'internal' KEYWORD!!!
 /// </summary>
 /// <typeparam name="TReq">The input type</typeparam>
 /// <typeparam name="TResp">The return type</typeparam>
 internal interface INadeoSlice<TReq, TResp>
 {
-    Task<TResp> HandleAsync(TReq request);
+    Task<TResp> HandleConsumeAsync(TReq request);
 }
 
 /// <inheritdoc cref="INadeoSlice{TReq, TResp}>" />
@@ -57,24 +43,11 @@ internal abstract class NadeoSlice<TReq, TResp>
     where TResp : notnull
 {
     protected abstract INadeoConsumerComponent<TReq, TResp> ConsumerComponent { get; }
-    protected abstract RedisRepositoryComponent<TResp>? RepositoryComponent { get; }
 
-    public async Task<TResp> HandleAsync(TReq request)
+    public async Task<TResp> HandleConsumeAsync(TReq request)
     {
-        if (ConsumerComponent is null)
-        {
-            throw new ArgumentNullException("The ConsumerComponent cannot be null");
-        }
+        ArgumentNullException.ThrowIfNull(ConsumerComponent);
 
-        var response = await ConsumerComponent.FetchData(request);
-        
-        if (RepositoryComponent is not null)
-        {
-            await RepositoryComponent.StoreDataAsync(response);
-        }
-
-        return response;
-    }
-
-    Task<TResp> INadeoSlice<TReq, TResp>.HandleAsync(TReq request) => HandleAsync(request);
+        return await ConsumerComponent.FetchDataAsync(request);
+    }    
 }

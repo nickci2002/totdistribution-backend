@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 using TOTDBackend.NadeoRefinery.Common.Extensions;
 using TOTDBackend.NadeoRefinery.Common.Features;
-using TOTDBackend.NadeoRefinery.Features.Queries;
+using TOTDBackend.NadeoRefinery.Features.Nadeo;
 
 namespace TOTDBackend.NadeoRefinery.Extensions;
 

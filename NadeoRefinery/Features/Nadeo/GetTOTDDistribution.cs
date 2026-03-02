@@ -1,4 +1,5 @@
 using Redis.OM;
+using Redis.OM.Searching;
 using Serilog;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
 using TOTDBackend.NadeoRefinery.Common.Features;
@@ -8,19 +9,19 @@ using TOTDBackend.NadeoRefinery.Entities;
 using TOTDBackend.NadeoRefinery.NadeoApi;
 using TOTDBackend.Shared.Primatives;
 
-namespace TOTDBackend.NadeoRefinery.Features.Queries;
+namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
 /// <inheritdoc cref="INadeoSlice{TReq, TResp}" />
 internal sealed class GetTOTDDistribution(
     ExtendedNadeoLiveServices liveServices,
     RedisConnectionProvider provider)
-    : NadeoSlice<MapPlacementsRequest, Distribution>
+    : NadeoSliceWithStorage<MapPlacementsRequest, Distribution>
 {
-    /// <inheritdoc cref="NadeoConsumerComponent{TReq, TResp}" />
+    /// <inheritdoc cref="INadeoConsumerComponent{TReq, TResp}" />
     internal sealed class Consumer(ExtendedNadeoLiveServices nadeoLiveServices)
-        : NadeoConsumerComponent<MapPlacementsRequest, Distribution>
+        : INadeoConsumerComponent<MapPlacementsRequest, Distribution>
     {
-        public override async Task<Distribution> FetchData(MapPlacementsRequest request)
+        public async Task<Distribution> FetchDataAsync(MapPlacementsRequest request)
         {
             Log.Information("Fetching distribution data from Nadeo servers...");
             
@@ -60,18 +61,21 @@ internal sealed class GetTOTDDistribution(
         }
     }
 
-    /// <inheritdoc cref="RedisRepositoryComponent{T}" />
+    /// <inheritdoc cref="IRedisRepositoryComponent{T}" />
     internal sealed class Repository(RedisConnectionProvider provider)
-        : RedisRepositoryComponent<Distribution>(provider)
+        : IRedisRepositoryComponent<Distribution>
     {
-        public override async Task<Distribution> RetrieveDataAsync(string key)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override async Task StoreDataAsync(Distribution data, TimeSpan? expiry = null)
+        private readonly RedisCollection<Distribution> _collection =
+            (RedisCollection<Distribution>)provider.RedisCollection<Distribution>();
+        
+        public async Task StoreDataAsync(Distribution data, TimeSpan? expiry = null)
         {
             await _collection.InsertAsync(data, WhenKey.Always, expiry);
+        }
+
+        public Distribution RetrieveData(string key)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -84,7 +88,7 @@ internal sealed class GetTOTDDistribution(
                                                         MapPlacementsRequest request) =>
             {
                 Log.Debug("{Request}", request);
-                return await query.HandleAsync(request);
+                return await query.HandleConsumeAndStorageAsync(request);
             });
         }
     }

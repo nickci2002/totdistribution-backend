@@ -6,7 +6,7 @@ namespace TOTDBackend.NadeoRefinery.Features;
 internal interface IRecurringJobSlice
 {
     void AddOrUpdate();
-    abstract void Handle();
+    Task HandleAsync();
 }
 
 /// <inheritdoc cref="IRecurringJobSlice">
@@ -25,8 +25,8 @@ internal abstract class RecurringJobSlice(RecurringJobManager jobManager) : IRec
 
     public void AddOrUpdate()
     {
-        jobManager.AddOrUpdate(Id, () => Handle(), CronExpression, JobOptions);
+        jobManager.AddOrUpdate(Id, () => HandleAsync(), CronExpression, JobOptions);
     }
 
-    public abstract void Handle();
+    public abstract Task HandleAsync();
 }

@@ -7,7 +7,7 @@ namespace TOTDBackend.NadeoRefinery.Entities;
 /// Entity for storing TOTD data in Redis
 /// </summary>
 [Document(Prefixes = new[]{"totd:map"})]
-public class TOTDInfo
+public record class TOTDInfo
 {
     [RedisIdField]
     [Indexed]
@@ -50,4 +50,7 @@ public class TOTDInfo
     public DateTimeOffset UpdateTimestamp { get; set; }
 
     public string ThumbnailUrl { get; set; } = string.Empty;
+
+    // Represents an empty instance
+    public static readonly TOTDInfo Empty = new();
 }

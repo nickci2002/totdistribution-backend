@@ -9,10 +9,10 @@ POST {{NadeoRefinery.HostAddress}}/totd/get-distribution
 Content-Type: application/json
 
 {
-    "mapUid": "ssCVidzcPRtF9Wb3_JaDkoXthse",
-    "groupUid": "Personal_Best",
-    "authorScore": 48002,
-    "goldScore": 51000,
-    "silverScore": 58000,
-    "bronzeScore": 73000
+    "mapUid": "LTSmGzmOCnWam4uPnv3Z0E_nPIb",
+    "groupUid": "068fbc0d-924e-48f4-9f42-47d9309666eb",
+    "authorScore": 50939,
+    "goldScore": 54000,
+    "silverScore": 62000,
+    "bronzeScore": 77000
 }
