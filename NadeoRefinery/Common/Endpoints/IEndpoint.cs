@@ -1,13 +1,13 @@
 namespace TOTDBackend.NadeoRefinery.Common.Endpoints;
 
-public interface ITestableEndpoint
+public interface IEndpoint
 {
-    abstract void MapTestingEndpoint(IEndpointRouteBuilder app);
+    abstract void MapEndpoint(IEndpointRouteBuilder app);
 }
 
-// Empty implementation of Web project packages to satisfy the compiler
 #if !WEB_API
-internal interface IEndpointRouteBuilder;
+// Empty implementation of Web project packages to satisfy the compiler
+public interface IEndpointRouteBuilder;
 
 internal static class EmptyEndpointExtensions
 {

@@ -1,27 +1,26 @@
 using Redis.OM;
 using Redis.OM.Searching;
-using Serilog;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
 using TOTDBackend.NadeoRefinery.Common.Features;
-using TOTDBackend.NadeoRefinery.Common.Requests;
+using TOTDBackend.NadeoRefinery.Models.Requests;
 using TOTDBackend.NadeoRefinery.Common.Utils;
-using TOTDBackend.NadeoRefinery.Entities;
-using TOTDBackend.NadeoRefinery.NadeoApi;
+using TOTDBackend.NadeoRefinery.Models.Entities;
 using TOTDBackend.Shared.Primatives;
+using ManiaAPI.NadeoAPI;
 
 namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
-/// <inheritdoc cref="INadeoSlice{TReq, TResp}" />
+/// <inheritdoc cref="NadeoCommunicatorWithStorageSlice{TReq, TResp}" />
 internal sealed class GetTOTDDistribution(
-    ExtendedNadeoLiveServices liveServices,
+    NadeoLiveServices liveServices,
     RedisConnectionProvider provider)
-    : NadeoSliceWithStorage<MapPlacementsRequest, Distribution>
+    : NadeoCommunicatorWithStorageSlice<MapMedals, Distribution>
 {
     /// <inheritdoc cref="INadeoConsumerComponent{TReq, TResp}" />
-    internal sealed class Consumer(ExtendedNadeoLiveServices nadeoLiveServices)
-        : INadeoConsumerComponent<MapPlacementsRequest, Distribution>
+    internal sealed class Consumer(NadeoLiveServices liveServices)
+        : INadeoConsumerComponent<MapMedals, Distribution>
     {
-        public async Task<Distribution> FetchDataAsync(MapPlacementsRequest request)
+        public async Task<Distribution> FetchDataAsync(MapMedals request)
         {
             Log.Information("Fetching distribution data from Nadeo servers...");
             
@@ -33,8 +32,8 @@ internal sealed class GetTOTDDistribution(
             for (int i = 0; i < numRequests; i++)
             {
                 var score = request.GetScore(i);
-                var position = (await nadeoLiveServices
-                    .GetMapPositionByTimeAsync(mapUid, score, groupUid))
+                var position = (await liveServices
+                    .GetLeaderboardPositionByTimeAsync(mapUid, groupUid, score))
                     .ElementAt(0);
                 positionList[i] = position.Zones[0].Ranking.Position - 1;
             }
@@ -79,13 +78,13 @@ internal sealed class GetTOTDDistribution(
         }
     }
 
-    /// <inheritdoc cref="ITestableEndpoint" />
-    public sealed class TestEndpoint : ITestableEndpoint
+    /// <inheritdoc cref="IEndpoint" />
+    public sealed class TestEndpoint : IEndpoint
     {
-        public void MapTestingEndpoint(IEndpointRouteBuilder app)
+        public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/totd/get-distribution", async(GetTOTDDistribution query,
-                                                        MapPlacementsRequest request) =>
+            app.MapPost("/totd/distribution", async(GetTOTDDistribution query,
+                                                        MapMedals request) =>
             {
                 Log.Debug("{Request}", request);
                 return await query.HandleConsumeAndStorageAsync(request);
@@ -95,4 +94,25 @@ internal sealed class GetTOTDDistribution(
 
     protected override Consumer ConsumerComponent => new(liveServices);
     protected override Repository RepositoryComponent => new(provider);
+
+    public override async Task<Distribution> HandleConsumeAsync(MapMedals request)
+    {
+        return await base.HandleConsumeAsync(request);
+    }
+
+    public override async Task HandleStorageAsync(Distribution distribution, TimeSpan? expiry = null)
+    {
+        await base.HandleStorageAsync(distribution, expiry);
+    }
+
+    public override async Task<Distribution> HandleConsumeAndStorageAsync(
+        MapMedals request, TimeSpan? expiry = null)
+    {
+        return await base.HandleConsumeAndStorageAsync(request, expiry);
+    }
+
+    public override Distribution HandleRetrieval(string key)
+    {
+        return base.HandleRetrieval(key);
+    }
 }

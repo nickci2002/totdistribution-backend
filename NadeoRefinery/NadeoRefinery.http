@@ -1,18 +1,18 @@
 @NadeoRefinery.HostAddress = http://localhost:5124
 
-GET {{NadeoRefinery.HostAddress}}/totd/obtain
+GET {{NadeoRefinery.HostAddress}}/totd/map-info
 Accept: application/json
 
 ###
 
-POST {{NadeoRefinery.HostAddress}}/totd/get-distribution
+POST {{NadeoRefinery.HostAddress}}/totd/distribution
 Content-Type: application/json
 
 {
-    "mapUid": "LTSmGzmOCnWam4uPnv3Z0E_nPIb",
-    "groupUid": "068fbc0d-924e-48f4-9f42-47d9309666eb",
-    "authorScore": 50939,
-    "goldScore": 54000,
-    "silverScore": 62000,
-    "bronzeScore": 77000
+    "mapUid": "H8fitfXs3a_eGmWjtPvLiNffuT8",
+    "groupUid": "40983c5d-8caf-493f-bb9e-4f86516ecf64",
+    "authorScore": 46391,
+    "goldScore": 50000,
+    "silverScore": 56000,
+    "bronzeScore": 70000
 }

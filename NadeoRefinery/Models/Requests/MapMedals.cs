@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using TOTDBackend.Shared.Primatives;
 
-namespace TOTDBackend.NadeoRefinery.Common.Requests;
+namespace TOTDBackend.NadeoRefinery.Models.Requests;
 
-public readonly record struct MapPlacementsRequest
+public readonly record struct MapMedals
 {
     public string MapUid { get; init; }
     public string GroupUid { get; init; }

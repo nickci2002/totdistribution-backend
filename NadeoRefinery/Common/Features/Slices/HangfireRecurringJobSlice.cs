@@ -1,7 +1,7 @@
 using Hangfire;
 using TOTDBackend.NadeoRefinery.Hangfire;
 
-namespace TOTDBackend.NadeoRefinery.Features;
+namespace TOTDBackend.NadeoRefinery.Common.Features;
 
 internal interface IRecurringJobSlice
 {
@@ -25,7 +25,11 @@ internal abstract class RecurringJobSlice(RecurringJobManager jobManager) : IRec
 
     public void AddOrUpdate()
     {
-        jobManager.AddOrUpdate(Id, () => HandleAsync(), CronExpression, JobOptions);
+        jobManager.AddOrUpdate(
+            recurringJobId: Id,
+            methodCall: () => HandleAsync(),
+            cronExpression: CronExpression,
+            options: JobOptions);
     }
 
     public abstract Task HandleAsync();

@@ -8,7 +8,7 @@ namespace TOTDBackend.NadeoRefinery.Extensions;
 
 public static class NadeoSliceExtensions
 {
-    public static IServiceCollection AddNadeoQuerySlices(
+    public static IServiceCollection AddNadeoSlices(
         this IServiceCollection services, IEnumerable<TypeInfo> types)
     {
         // var endpointTypes = types.GetServiceSlicesAsArray(typeof(NadeoSlice<>));
@@ -17,8 +17,9 @@ public static class NadeoSliceExtensions
         // types.ToList().ForEach(t => Console.WriteLine("{0}", t));
         // Console.WriteLine("{0}", endpointTypes.Length);
 
+        //services.AddTransient<GetTOTDAuthorRecord>();
         services.AddTransient<GetTOTDDistribution>();
-        services.AddTransient<ObtainCurrentTOTDInfo>();
+        services.AddTransient<GetTOTDInfo>();
 
         return services;
     }

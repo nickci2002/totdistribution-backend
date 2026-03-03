@@ -1,5 +1,4 @@
 using ManiaAPI.NadeoAPI;
-using TOTDBackend.NadeoRefinery.NadeoApi;
 
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
@@ -21,14 +20,14 @@ public static class NadeoAPIServices
         var userAgent = config.GetValue<string>("UserAgent")!;
         services.AddHttpClient<NadeoServices>().ConfigureHttpClient((client) =>
             client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent));
-        services.AddHttpClient<ExtendedNadeoLiveServices>().ConfigureHttpClient((client) =>
+        services.AddHttpClient<NadeoLiveServices>().ConfigureHttpClient((client) =>
             client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent));
 
         services.AddTransient((provider) => new NadeoServices(
             provider.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(NadeoServices)),
             provider.GetRequiredKeyedService<NadeoAPIHandler>(nameof(NadeoServices))));
-        services.AddTransient(provider => new ExtendedNadeoLiveServices(
-            provider.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(ExtendedNadeoLiveServices)),
+        services.AddTransient(provider => new NadeoLiveServices(
+            provider.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(NadeoLiveServices)),
             provider.GetRequiredKeyedService<NadeoAPIHandler>(nameof(NadeoLiveServices))));
         
         return services;

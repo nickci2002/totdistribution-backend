@@ -1,24 +1,23 @@
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System.Text.Json;
-using TOTDBackend.Shared.Common.RabbitMQ;
+using TOTDBackend.Shared.RabbitMQ.Features;
 
 namespace TOTDBackend.Shared.RabbitMQ;
 
 public class RabbitMQPublisherBase<TData>(
     ILogger<RabbitMQPublisherBase<TData>> logger,
     IOptions<MessageQueueOptions> mqOptions,
-    JsonSerializerOptions serializerOptions,
-    IServiceProvider serviceProvider)
+    JsonSerializerOptions serializerOptions)
     : RabbitMQServiceBase(logger, mqOptions)
+    where TData : notnull
 {
-    public async Task PublishAsync(TData body, CancellationToken cancellationToken)
+    public async Task PublishAsync(
+        TData data,
+        IRabbitMQPublisherHandlerComponent<TData> handler,
+        CancellationToken cancellationToken)
     {
-        await using var scope = serviceProvider.CreateAsyncScope();
-        var publisherHandler = scope.ServiceProvider.GetRequiredService<IRabbitMQPublisherHandler<TData>>();
-
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -28,14 +27,14 @@ public class RabbitMQPublisherBase<TData>(
 
             await AutoQueueDeclareAsync(cancellationToken);
 
-            var bodyAsBytes = JsonSerializer.SerializeToUtf8Bytes(body, serializerOptions);
+            var bodyAsBytes = SerializeToUtf8Bytes(data);
             await Channel!.BasicPublishAsync(
                 exchange: "",
                 routingKey: QueueName,
                 body: bodyAsBytes,
                 cancellationToken: cancellationToken);
             
-            await publisherHandler.OnPublishSuccessAsync();
+            await handler.HandlePublishConfirmAsync();
 
             if (logger.IsEnabled(LogLevel.Information))
             {
@@ -49,7 +48,12 @@ public class RabbitMQPublisherBase<TData>(
                 logger.LogError("There was an error sending the message!");
             }
 
-            await publisherHandler.OnPublishFailureAsync();
+            await handler.HandlePublishFailureAsync();
         }
+    }
+
+    private byte[] SerializeToUtf8Bytes(TData data)
+    {
+        return JsonSerializer.SerializeToUtf8Bytes(data, data.GetType(), serializerOptions);
     }
 }

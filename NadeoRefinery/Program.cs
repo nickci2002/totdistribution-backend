@@ -1,5 +1,5 @@
 using System.Reflection;
-using Serilog;
+using Serilog.Extensions.Hosting;
 using TOTDBackend.NadeoRefinery.Extensions;
 using TOTDBackend.Shared.RabbitMQ;
 
@@ -12,6 +12,7 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
+builder.Host.AddSerilog();
 builder.Services.ConfigureJsonProperties();
 
 var sliceTypes = Assembly
@@ -19,12 +20,10 @@ var sliceTypes = Assembly
     .DefinedTypes
     .Where((type) => type is { IsInterface: false, IsAbstract: false });
 
-builder.Services.AddRedisDb(config.GetSection("Redis"));
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
-builder.Services.AddNadeoQuerySlices(sliceTypes);
+builder.Services.AddNadeoSlices(sliceTypes);
+builder.Services.AddRedisDb(config.GetSection("Redis"));
 builder.Services.AddTestingEndpoints(sliceTypes);
-
-builder.Host.AddSerilog();
 
 // builder.Services.AddHostedService(sp => 
 // {
@@ -37,12 +36,36 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseSerilogRequestLogging();
 
-app.MapTestingEndpoints();
+app.MapEndpoints();
 
 app.Run();
 
 #elif WORKER
 // If implemented as a worker service (for production)
 var builder = Host.CreateApplicationBuilder();
+
+//GlobalConfiguration.Configuration
+
+var config = new ConfigurationBuilder()
+    .AddJsonFile("secrets.json")
+    .AddEnvironmentVariables()
+    .Build();
+
+builder.Services.AddSerilog(builder.Configuration);
+builder.Services.ConfigureJsonProperties();
+
+var sliceTypes = Assembly
+    .GetExecutingAssembly()
+    .DefinedTypes
+    .Where((type) => type is { IsInterface: false, IsAbstract: false });
+
+builder.Services.AddHangfireServices();
+builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
+builder.Services.AddNadeoSlices(sliceTypes);
+builder.Services.AddRedisDb(config.GetSection("Redis"));
+
+var app = builder.Build();
+
+await app.RunAsync();
 
 #endif

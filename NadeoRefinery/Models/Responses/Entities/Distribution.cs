@@ -1,6 +1,6 @@
 using Redis.OM.Modeling;
 
-namespace TOTDBackend.NadeoRefinery.Entities;
+namespace TOTDBackend.NadeoRefinery.Models.Entities;
 
 [Document(Prefixes = new[] { "totd:distribution" })]
 public class Distribution

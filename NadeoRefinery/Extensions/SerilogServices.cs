@@ -1,14 +1,18 @@
-using Serilog;
-
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
 public static class SerilogServices
 {
-    public static IHostBuilder AddSerilog(this IHostBuilder host)
-    {
+    /// <summary>
+    /// Used for Web project
+    /// </summary>
+    public static IHostBuilder AddSerilog(this IHostBuilder host) =>
         host.UseSerilog((context, configuration) => 
             configuration.ReadFrom.Configuration(context.Configuration));
-
-        return host;
-    }
+    
+    /// <summary>
+    /// Used for Worker project
+    /// </summary>
+    public static IServiceCollection AddSerilog(this IServiceCollection services, IConfiguration configuration) =>
+        services.AddSerilog(config =>
+            config.ReadFrom.Configuration(configuration)); 
 }

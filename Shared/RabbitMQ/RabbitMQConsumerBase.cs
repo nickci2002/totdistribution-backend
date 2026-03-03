@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
-using TOTDBackend.Shared.Common.RabbitMQ;
+using TOTDBackend.Shared.RabbitMQ.Features;
 
 namespace TOTDBackend.Shared.RabbitMQ;
 
@@ -29,15 +29,18 @@ public class RabbitMqConsumerBase<TData>(
         var consumer = new AsyncEventingBasicConsumer(Channel);
         consumer.ReceivedAsync += async (_, args) =>
         {
+            var routingKey = args.RoutingKey;
+            
             await using var scope = serviceProvider.CreateAsyncScope();
-            var consumerHandler = scope.ServiceProvider.GetRequiredService<IRabbitMQConsumerHandler<TData>>();
+            var consumerHandler = scope.ServiceProvider
+                .GetRequiredKeyedService<IRabbitMQConsumerHandlerComponent<TData>>(routingKey);
 
             try
             {
                 var body = args.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
 
-                var payload = consumerHandler.Deserialize(message, serializerOptions);
+                var payload = Deserialize(message);
 
                 if (logger.IsEnabled(LogLevel.Information))
                 {
@@ -49,7 +52,7 @@ public class RabbitMqConsumerBase<TData>(
                     multiple: false,
                     cancellationToken: cancellationToken);
 
-                await consumerHandler.OnConsumerAckAsync();
+                await consumerHandler.HandleConsumerAckAsync();
             }
             catch
             {
@@ -64,7 +67,7 @@ public class RabbitMqConsumerBase<TData>(
                     requeue: true,
                     cancellationToken: cancellationToken);
 
-                await consumerHandler.OnConsumerNackAsync();
+                await consumerHandler.HandleConsumerNackAsync();
             }
         };
 
@@ -73,5 +76,11 @@ public class RabbitMqConsumerBase<TData>(
             autoAck: false,
             consumer: consumer,
             cancellationToken: cancellationToken);
+    }
+
+    private TData Deserialize(string message)
+    {
+        return JsonSerializer.Deserialize<TData>(message, serializerOptions) ?? 
+            throw new Exception("Error deserializing for RabbitMQConsumerBase!");
     }
 }

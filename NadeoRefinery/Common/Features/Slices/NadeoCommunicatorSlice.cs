@@ -5,19 +5,19 @@ namespace TOTDBackend.NadeoRefinery.Common.Features;
 /// ALL DERIVED CLASSES SHOULD USE THE 'internal' KEYWORD!!!
 /// </summary>
 /// <typeparam name="TResp">The return type</typeparam>
-internal interface INadeoSlice<TResp>
+internal interface INadeoCommunicatorSlice<TResp>
 {
     Task<TResp> HandleConsumeAsync();
 }
 
-/// <inheritdoc cref="INadeoSlice{TResp}>" />
-internal abstract class NadeoSlice<TResp>
-    : INadeoSlice<TResp>
+/// <inheritdoc cref="INadeoCommunicatorSlice{TResp}>" />
+internal abstract class NadeoCommunicatorSlice<TResp>
+    : INadeoCommunicatorSlice<TResp>
     where TResp : notnull
 {
     protected abstract INadeoConsumerComponent<TResp> ConsumerComponent { get; }
 
-    public async Task<TResp> HandleConsumeAsync()
+    public virtual async Task<TResp> HandleConsumeAsync()
     {
         ArgumentNullException.ThrowIfNull(ConsumerComponent);
 
@@ -31,20 +31,20 @@ internal abstract class NadeoSlice<TResp>
 /// </summary>
 /// <typeparam name="TReq">The input type</typeparam>
 /// <typeparam name="TResp">The return type</typeparam>
-internal interface INadeoSlice<TReq, TResp>
+internal interface INadeoCommunicatorSlice<TReq, TResp>
 {
     Task<TResp> HandleConsumeAsync(TReq request);
 }
 
-/// <inheritdoc cref="INadeoSlice{TReq, TResp}>" />
-internal abstract class NadeoSlice<TReq, TResp>
-    : INadeoSlice<TReq, TResp>
+/// <inheritdoc cref="INadeoCommunicatorSlice{TReq, TResp}>" />
+internal abstract class NadeoCommunicatorSlice<TReq, TResp>
+    : INadeoCommunicatorSlice<TReq, TResp>
     where TReq : notnull
     where TResp : notnull
 {
     protected abstract INadeoConsumerComponent<TReq, TResp> ConsumerComponent { get; }
 
-    public async Task<TResp> HandleConsumeAsync(TReq request)
+    public virtual async Task<TResp> HandleConsumeAsync(TReq request)
     {
         ArgumentNullException.ThrowIfNull(ConsumerComponent);
 

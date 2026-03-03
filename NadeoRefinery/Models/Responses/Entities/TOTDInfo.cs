@@ -1,7 +1,7 @@
 using Redis.OM.Modeling;
 using TOTDBackend.Shared.Primatives;
 
-namespace TOTDBackend.NadeoRefinery.Entities;
+namespace TOTDBackend.NadeoRefinery.Models.Entities;
 
 /// <summary>
 /// Entity for storing TOTD data in Redis

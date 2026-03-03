@@ -10,7 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
     <PackageReference Include="Hangfire.Core" Version="1.8.23" />
-    <PackageReference Include="ManiaAPI.NadeoAPI" Version="2.5.2" />
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
+    <PackageReference Include="ManiaAPI.NadeoAPI" Version="2.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
     <PackageReference Include="NRedisStack" Version="1.2.0" />
     <PackageReference Include="Redis.OM" Version="1.1.0" />

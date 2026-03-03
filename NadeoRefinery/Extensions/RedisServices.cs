@@ -1,6 +1,6 @@
 using Redis.OM;
 using StackExchange.Redis;
-using TOTDBackend.NadeoRefinery.Entities;
+using TOTDBackend.NadeoRefinery.Models.Entities;
 
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
@@ -10,8 +10,6 @@ public static class RedisServices
         this IServiceCollection services,
         IConfiguration config)
     {
-        services.AddHostedService<IndexCreationService>();
-        
         // services.AddSingleton(sp =>
         // {
         //     var redisConnString = config.GetValue<string>("ConnectionString")!;
@@ -29,6 +27,8 @@ public static class RedisServices
             var redisConnString = config.GetValue<string>("ConnectionString")!;
             return new RedisConnectionProvider(redisConnString);
         });
+
+        services.AddHostedService<IndexCreationService>();
 
         return services;
     }
