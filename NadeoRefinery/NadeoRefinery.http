@@ -10,9 +10,19 @@ Content-Type: application/json
 
 {
     "mapUid": "H8fitfXs3a_eGmWjtPvLiNffuT8",
-    "groupUid": "40983c5d-8caf-493f-bb9e-4f86516ecf64",
+    "groupUid": "Personal_Best",
     "authorScore": 46391,
     "goldScore": 50000,
     "silverScore": 56000,
     "bronzeScore": 70000
+}
+
+###
+
+GET {{NadeoRefinery.HostAddress}}/totd/author-record
+Content-Type: application/json
+
+{
+    "accountId": "808ad399-63fb-4b41-afaa-456bff4cd42b",
+    "mapId" : "a53b1abe-d84e-4784-9fd7-3ab566eef9b3"
 }

@@ -17,9 +17,9 @@ public static class NadeoSliceExtensions
         // types.ToList().ForEach(t => Console.WriteLine("{0}", t));
         // Console.WriteLine("{0}", endpointTypes.Length);
 
-        //services.AddTransient<GetTOTDAuthorRecord>();
-        services.AddTransient<GetTOTDDistribution>();
-        services.AddTransient<GetTOTDInfo>();
+        services.AddScoped<GetTOTDAuthorRecord>();
+        services.AddScoped<GetTOTDDistribution>();
+        services.AddScoped<GetTOTDInfo>();
 
         return services;
     }

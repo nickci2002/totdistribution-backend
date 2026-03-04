@@ -1,7 +1,9 @@
+using System.Runtime.InteropServices;
 using ManiaAPI.NadeoAPI;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
 using TOTDBackend.NadeoRefinery.Common.Features;
-using TOTDBackend.NadeoRefinery.Models.Entities;
 using TOTDBackend.NadeoRefinery.Models.Requests;
 using TOTDBackend.NadeoRefinery.Models.Responses;
 
@@ -28,7 +30,7 @@ internal sealed class GetTOTDAuthorRecord(NadeoServices services)
             
             return new PlayerScore
             {
-                MedalType = record.Medals
+                MedalCount = record.Medals
             };
         }
     }
@@ -38,16 +40,15 @@ internal sealed class GetTOTDAuthorRecord(NadeoServices services)
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapGet("/totd/author-record", async (GetTOTDAuthorRecord query, PlayerMapInfo request) =>
-            {
-                return await query.HandleConsumeAsync(request);
-            });
+            app.MapGet("/totd/author-record", async (
+                [FromServices] GetTOTDAuthorRecord query, [FromBody] PlayerMapInfo request) =>
+                    await query.HandleConsumeAsync(request));
         }
     }
 
     protected override Consumer ConsumerComponent => new(services);
 
-    public override async Task<TOTDInfo> HandleConsumeAsync(PlayerMapScore request)
+    public override async Task<PlayerScore> HandleConsumeAsync(PlayerMapInfo request)
     {
         return await base.HandleConsumeAsync(request);
     }

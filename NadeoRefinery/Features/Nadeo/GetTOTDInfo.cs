@@ -1,13 +1,13 @@
-using System.Diagnostics;
-using System.Text.Json;
 using ManiaAPI.NadeoAPI;
+using Microsoft.AspNetCore.Mvc;
 using Redis.OM;
 using Redis.OM.Searching;
+using System.Diagnostics;
+using System.Text.Json;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
 using TOTDBackend.NadeoRefinery.Common.Features;
 using TOTDBackend.NadeoRefinery.Common.Utils;
 using TOTDBackend.NadeoRefinery.Models.Entities;
-using TOTDBackend.NadeoRefinery.NadeoApi;
 
 namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
@@ -77,22 +77,22 @@ internal sealed class GetTOTDInfo(
         public async Task StoreDataAsync(TOTDInfo data, TimeSpan? expiry = null)
         {
             var totdId = data.Id;
-            Log.Information("Storing data with key {} into the Redis database...", totdId);
-            Log.Debug("Value found: {}", JsonSerializer.Serialize(data));
+            Log.Information("Storing data with key {Id} into the Redis database...", totdId);
+            Log.Debug("Value found: {Data}", JsonSerializer.Serialize(data));
             
             await _collection.InsertAsync(data, WhenKey.Always, expiry);
 
-            Log.Information("Successfully stored data with key {}!", totdId);
+            Log.Information("Successfully stored data with key {Id}!", totdId);
         }
         
         public TOTDInfo RetrieveData(string key)
         {
-            Log.Information("Retrieving information for type {} with value {}...", nameof(TOTDInfo), key);
+            Log.Information("Retrieving information for type {Type} with key {Key}...", nameof(TOTDInfo), key);
 
             _collection.FindById(key);
             if (!int.TryParse(key, out var keyAsInt))
             {
-                Log.Error("{} is not a valid key! Cancelling search...");
+                Log.Error("{Key} is not a valid key! Cancelling search...", key);
                 return TOTDInfo.Empty;
             }
 
@@ -100,12 +100,12 @@ internal sealed class GetTOTDInfo(
 
             if (redisEntry == TOTDInfo.Empty)
             {
-                Log.Error("Key {} was not found in the Redis database!", key);
+                Log.Error("Key {Key} was not found in the Redis database!", key);
             }
             else
             {
-                Log.Information("Found data with key {}!", key);
-                Log.Debug("Value found: {}", JsonSerializer.Serialize(redisEntry));
+                Log.Information("Found data with key {Key}!", key);
+                Log.Debug("Value found: {Id}", JsonSerializer.Serialize(redisEntry));
             }
             
             return redisEntry;
@@ -117,7 +117,7 @@ internal sealed class GetTOTDInfo(
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapGet("/totd/map-info", async (GetTOTDInfo query) => 
+            app.MapGet("/totd/map-info", async ([FromServices] GetTOTDInfo query) => 
             {
                 return await query.HandleConsumeAndStorageAsync();
             });

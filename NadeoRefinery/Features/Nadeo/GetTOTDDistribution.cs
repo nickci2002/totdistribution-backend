@@ -1,3 +1,4 @@
+using ManiaAPI.NadeoAPI;
 using Redis.OM;
 using Redis.OM.Searching;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
@@ -6,7 +7,7 @@ using TOTDBackend.NadeoRefinery.Models.Requests;
 using TOTDBackend.NadeoRefinery.Common.Utils;
 using TOTDBackend.NadeoRefinery.Models.Entities;
 using TOTDBackend.Shared.Primatives;
-using ManiaAPI.NadeoAPI;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
@@ -83,8 +84,8 @@ internal sealed class GetTOTDDistribution(
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/totd/distribution", async(GetTOTDDistribution query,
-                                                        MapMedals request) =>
+            app.MapPost("/totd/distribution", async(
+                [FromServices] GetTOTDDistribution query, [FromBody] MapMedals request) =>
             {
                 Log.Debug("{Request}", request);
                 return await query.HandleConsumeAndStorageAsync(request);

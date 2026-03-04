@@ -1,6 +1,7 @@
 using System.Reflection;
 using Serilog.Extensions.Hosting;
 using TOTDBackend.NadeoRefinery.Extensions;
+using TOTDBackend.NadeoRefinery.Features.Nadeo;
 using TOTDBackend.Shared.RabbitMQ;
 
 #if WEB_API
@@ -36,7 +37,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseSerilogRequestLogging();
 
-app.MapEndpoints();
+app.MapTestingEndpoints();
 
 app.Run();
 
