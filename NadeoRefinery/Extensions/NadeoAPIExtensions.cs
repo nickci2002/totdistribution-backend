@@ -3,7 +3,7 @@ using ManiaAPI.NadeoAPI;
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
 // Modified code from ManiaAPI.NadeoAPI.Extensions.Hosting NuGet package
-public static class NadeoAPIServices
+public static class NadeoAPIExtensions
 {
     public static IServiceCollection AddNadeoAPIServices(this IServiceCollection services, IConfiguration config)
     {

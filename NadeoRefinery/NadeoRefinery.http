@@ -9,12 +9,12 @@ POST {{NadeoRefinery.HostAddress}}/totd/distribution
 Content-Type: application/json
 
 {
-    "mapUid": "H8fitfXs3a_eGmWjtPvLiNffuT8",
-    "groupUid": "Personal_Best",
-    "authorScore": 46391,
-    "goldScore": 50000,
-    "silverScore": 56000,
-    "bronzeScore": 70000
+    "mapUid": "5vkXMrKBAQP24QQrj2OchuxtOZ1",
+    "groupUid": "1b432ad8-d83d-4253-87e2-089eb6957188",
+    "authorScore": 50502,
+    "goldScore": 54000,
+    "silverScore": 61000,
+    "bronzeScore": 76000
 }
 
 ###
@@ -23,6 +23,6 @@ GET {{NadeoRefinery.HostAddress}}/totd/author-record
 Content-Type: application/json
 
 {
-    "accountId": "808ad399-63fb-4b41-afaa-456bff4cd42b",
-    "mapId" : "a53b1abe-d84e-4784-9fd7-3ab566eef9b3"
+    "accountId": "b8df00f6-431c-40f8-96fc-5cd83906c520",
+    "mapId" : "6fe651d8-1435-44be-9aa1-0418fa326b17"
 }

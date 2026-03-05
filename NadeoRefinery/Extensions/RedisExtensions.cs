@@ -4,29 +4,27 @@ using TOTDBackend.NadeoRefinery.Models.Entities;
 
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
-public static class RedisServices
+public static class RedisExtensions
 {
-    public static IServiceCollection AddRedisDb(
+    public static IServiceCollection AddRedisDbServices(
         this IServiceCollection services,
         IConfiguration config)
     {
-        // services.AddSingleton(sp =>
-        // {
-        //     var redisConnString = config.GetValue<string>("ConnectionString")!;
-        //     return ConnectionMultiplexer.Connect(redisConnString);
-        // });
+        var redisConnString = config.GetValue<string>("CM_ConnectionString")!;
+        var multiplexer = ConnectionMultiplexer.Connect(redisConnString);
 
-        // services.AddSingleton(sp =>
-        // {
-        //     var multiplexer = sp.GetRequiredService<ConnectionMultiplexer>();
-        //     return new RedisConnectionProvider(multiplexer);
-        // });
-
-        services.AddSingleton(sp =>
+        services.AddSingleton<IConnectionMultiplexer>(sp => multiplexer);
+        services.AddSingleton(sp => 
         {
-            var redisConnString = config.GetValue<string>("ConnectionString")!;
-            return new RedisConnectionProvider(redisConnString);
+            var multiplexer = sp.GetRequiredService<IConnectionMultiplexer>();
+            return new RedisConnectionProvider(multiplexer);
         });
+
+        // services.AddSingleton(sp =>
+        // {
+        //     var redisConnString = config.GetValue<string>("RCP_ConnectionString")!;
+        //     return new RedisConnectionProvider(redisConnString);
+        // });
 
         services.AddHostedService<IndexCreationService>();
 

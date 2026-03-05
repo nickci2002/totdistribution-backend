@@ -13,7 +13,7 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-builder.Host.AddSerilog();
+builder.Host.AddSerilogHost();
 builder.Services.ConfigureJsonProperties();
 
 var sliceTypes = Assembly
@@ -22,8 +22,9 @@ var sliceTypes = Assembly
     .Where((type) => type is { IsInterface: false, IsAbstract: false });
 
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
-builder.Services.AddNadeoSlices(sliceTypes);
-builder.Services.AddRedisDb(config.GetSection("Redis"));
+builder.Services.AddNadeoSliceServices(sliceTypes);
+builder.Services.AddRedisDbServices(config.GetSection("Redis"));
+
 builder.Services.AddTestingEndpoints(sliceTypes);
 
 // builder.Services.AddHostedService(sp => 
@@ -37,7 +38,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseSerilogRequestLogging();
 
-app.MapTestingEndpoints();
+app.MapEndpoints();
 
 app.Run();
 
@@ -52,7 +53,7 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-builder.Services.AddSerilog(builder.Configuration);
+builder.Services.AddSerilogServices(builder.Configuration);
 builder.Services.ConfigureJsonProperties();
 
 var sliceTypes = Assembly
@@ -62,8 +63,8 @@ var sliceTypes = Assembly
 
 builder.Services.AddHangfireServices();
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
-builder.Services.AddNadeoSlices(sliceTypes);
-builder.Services.AddRedisDb(config.GetSection("Redis"));
+builder.Services.AddNadeoSliceServices(sliceTypes);
+builder.Services.AddRedisDbServices(config.GetSection("Redis"));
 
 var app = builder.Build();
 

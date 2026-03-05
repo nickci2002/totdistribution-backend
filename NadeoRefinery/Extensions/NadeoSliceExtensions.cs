@@ -8,7 +8,7 @@ namespace TOTDBackend.NadeoRefinery.Extensions;
 
 public static class NadeoSliceExtensions
 {
-    public static IServiceCollection AddNadeoSlices(
+    public static IServiceCollection AddNadeoSliceServices(
         this IServiceCollection services, IEnumerable<TypeInfo> types)
     {
         // var endpointTypes = types.GetServiceSlicesAsArray(typeof(NadeoSlice<>));

@@ -6,7 +6,7 @@ using TOTDBackend.NadeoRefinery.Common.Extensions;
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
 #if WEB_API
-public static class NadeoRefineryTestEndpoints
+public static class TestEndpointExtensions
 {
     public static IServiceCollection AddTestingEndpoints(
         this IServiceCollection services, IEnumerable<TypeInfo> types)

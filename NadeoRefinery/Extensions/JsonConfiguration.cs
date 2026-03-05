@@ -2,7 +2,7 @@ using TOTDBackend.Shared.Json;
 
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
-public static class JsonExtensions
+public static class JsonConfigurationExtensions
 {
     public static IServiceCollection ConfigureJsonProperties(this IServiceCollection services) =>
         services.ConfigureHttpJsonOptions(options =>
