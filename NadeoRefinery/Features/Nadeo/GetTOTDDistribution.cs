@@ -8,17 +8,18 @@ using TOTDBackend.NadeoRefinery.Common.Utils;
 using TOTDBackend.NadeoRefinery.Models.Entities;
 using TOTDBackend.Shared.Primatives;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
 /// <inheritdoc cref="NadeoCommunicatorWithStorageSlice{TReq, TResp}" />
 internal sealed class GetTOTDDistribution(
-    NadeoLiveServices liveServices,
-    RedisConnectionProvider provider)
+    NadeoLiveServices nadeoLive,
+    RedisConnectionProvider redis)
     : NadeoCommunicatorWithStorageSlice<MapMedals, Distribution>
 {
     /// <inheritdoc cref="INadeoConsumerComponent{TReq, TResp}" />
-    internal sealed class Consumer(NadeoLiveServices liveServices)
+    internal sealed class Consumer(NadeoLiveServices nadeoLive)
         : INadeoConsumerComponent<MapMedals, Distribution>
     {
         public async Task<Distribution> FetchDataAsync(MapMedals request)
@@ -33,13 +34,14 @@ internal sealed class GetTOTDDistribution(
             for (int i = 0; i < numRequests; i++)
             {
                 var score = request.GetScore(i);
-                var position = (await liveServices
+                var position = (await nadeoLive
                     .GetLeaderboardPositionByTimeAsync(mapUid, groupUid, score))
                     .ElementAt(0);
                 positionList[i] = position.Zones[0].Ranking.Position - 1;
             }
 
-            Log.Information("Finished fetching distribution data!");
+            Log.Information("Finished fetching data!");
+            Log.Information("Formatting distribution data for proper storage...");
 
             var authorCount = positionList[(int)MedalType.Author];
             var goldCount = positionList[(int)MedalType.Gold] - positionList[(int)MedalType.Author];
@@ -47,9 +49,11 @@ internal sealed class GetTOTDDistribution(
             var bronzeCount = positionList[(int)MedalType.Bronze] - positionList[(int)MedalType.Gold];
             var noneCount = positionList[(int)MedalType.None] - positionList[(int)MedalType.Bronze];
 
+            Log.Information("Finished formatting data!");
+
             return new Distribution
             {
-                Id = TOTDDayFinder.CreateRedisTOTDIdKey(),
+                Id = TOTDDayFinder.CreateRedisTOTDIdKeyAsInt(),
                 MapUid = mapUid,
                 GroupUid = groupUid,
                 AuthorCount = authorCount,
@@ -62,11 +66,11 @@ internal sealed class GetTOTDDistribution(
     }
 
     /// <inheritdoc cref="IRedisRepositoryComponent{T}" />
-    internal sealed class Repository(RedisConnectionProvider provider)
+    internal sealed class Repository(RedisConnectionProvider redis)
         : IRedisRepositoryComponent<Distribution>
     {
         private readonly RedisCollection<Distribution> _collection =
-            (RedisCollection<Distribution>)provider.RedisCollection<Distribution>();
+            (RedisCollection<Distribution>)redis.RedisCollection<Distribution>();
         
         public async Task StoreDataAsync(Distribution data, TimeSpan? expiry = null)
         {
@@ -75,7 +79,28 @@ internal sealed class GetTOTDDistribution(
 
         public Distribution RetrieveData(string key)
         {
-            throw new NotImplementedException();
+            Log.Information("Retrieving information for type {Type} with key {Key}...", nameof(Distribution), key);
+
+            _collection.FindById(key);
+            if (!int.TryParse(key, out var keyAsInt))
+            {
+                Log.Error("{Key} is not a valid key! Cancelling search...", key);
+                return Distribution.Empty;
+            }
+
+            var redisEntry = _collection.Where(x => x.Id == keyAsInt).FirstOrDefault(Distribution.Empty);
+
+            if (redisEntry == Distribution.Empty)
+            {
+                Log.Error("Key {Key} was not found in the Redis database!", key);
+            }
+            else
+            {
+                Log.Information("Found data with key {Key}!", key);
+                Log.Debug("Value found: {Id}", JsonSerializer.Serialize(redisEntry));
+            }
+
+            return redisEntry;
         }
     }
 
@@ -84,17 +109,17 @@ internal sealed class GetTOTDDistribution(
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("/totd/distribution", async(
+            app.MapPost("/nadeo/distribution", async(
                 [FromServices] GetTOTDDistribution query, [FromBody] MapMedals request) =>
             {
-                Log.Debug("{Request}", request);
+                Log.Verbose("{Request}", request);
                 return await query.HandleConsumeAndStorageAsync(request);
             });
         }
     }
 
-    protected override Consumer ConsumerComponent => new(liveServices);
-    protected override Repository RepositoryComponent => new(provider);
+    protected override Consumer ConsumerComponent => new(nadeoLive);
+    protected override Repository RepositoryComponent => new(redis);
 
     public override async Task<Distribution> HandleConsumeAsync(MapMedals request)
     {

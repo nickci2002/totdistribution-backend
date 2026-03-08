@@ -7,10 +7,8 @@ public static class TypeReflection
     public static ServiceDescriptor[] GetServiceSlicesAsArray(
         this IEnumerable<TypeInfo> types, Type typeToFind)
     {
-        var matchingTypes = types
-            .Where(typeToFind.IsAssignableFrom);
-
-        var descriptors = matchingTypes
+        var descriptors = types
+            .Where(typeToFind.IsAssignableFrom)
             .Select(type => ServiceDescriptor.Transient(typeToFind, type));
 
         return [.. descriptors];

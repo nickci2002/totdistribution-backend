@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <DefineConstants>WEB_API</DefineConstants>
+    <DefineConstants>WORKER</DefineConstants>
     <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
 

@@ -13,19 +13,19 @@ namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
 /// <inheritdoc cref="NadeoCommunicatorWithStorageSlice{TResp}" />
 internal sealed class GetTOTDInfo(
-    NadeoLiveServices liveServices,
-    RedisConnectionProvider provider)
+    NadeoLiveServices nadeoLive,
+    RedisConnectionProvider redis)
     : NadeoCommunicatorWithStorageSlice<TOTDInfo>
 {
     /// <inheritdoc cref="INadeoConsumerComponent{TResp}" />
-    internal sealed class Consumer(NadeoLiveServices liveServices)
+    internal sealed class Consumer(NadeoLiveServices nadeoLive)
         : INadeoConsumerComponent<TOTDInfo>
     {
         public async Task<TOTDInfo> FetchDataAsync()
         {
             Log.Information("Fetching TOTD information from Nadeo servers...");
 
-            var totdList = await liveServices.GetTrackOfTheDaysAsync(1, 0, false);
+            var totdList = await nadeoLive.GetTrackOfTheDaysAsync(1, 0, false);
             // Bail out if certain conditions aren't met
             Debug.Assert(totdList is not null, "Failed to retrieve TOTD list from Nadeo Live Services");
             Debug.Assert(!totdList.MonthList.IsEmpty, "No track of the days for the given month!");
@@ -35,13 +35,13 @@ internal sealed class GetTOTDInfo(
             // Bail out if certain conditions aren't met
             Debug.Assert(totdCurrent is not null, 
                          "There is no TOTD for {dateNow.Day}/{dateNow.Month}/{dateNow.Year}");
-            
+
             var totdSeasonGuid = totdCurrent.SeasonUid;
             // Bail out if certain conditions aren't met
             Debug.Assert(totdSeasonGuid != Guid.Empty, "TOTD Season UID is null");
 
             var totdMapUid = totdCurrent.MapUid;
-            var totdInfo = await liveServices.GetMapInfoAsync(totdMapUid);
+            var totdInfo = await nadeoLive.GetMapInfoAsync(totdMapUid);
             // Bail out if certain conditions aren't met
             Debug.Assert(totdInfo is not null, $"The map {totdMapUid} does not exist");
 
@@ -49,7 +49,7 @@ internal sealed class GetTOTDInfo(
 
             return new TOTDInfo
             {
-                Id = TOTDDayFinder.CreateRedisTOTDIdKey(),
+                Id = TOTDDayFinder.CreateRedisTOTDIdKeyAsInt(),
                 MapUid = totdInfo.Uid,
                 MapGuid = totdInfo.MapId,
                 SeasonGuid = totdSeasonGuid,
@@ -68,46 +68,41 @@ internal sealed class GetTOTDInfo(
     }
 
     /// <inheritdoc cref="IRedisRepositoryComponent{T}" />
-    internal sealed class Repository(RedisConnectionProvider provider)
+    internal sealed class Repository(RedisConnectionProvider redis)
         : IRedisRepositoryComponent<TOTDInfo>
     {
         private readonly RedisCollection<TOTDInfo> _collection =
-            (RedisCollection<TOTDInfo>)provider.RedisCollection<TOTDInfo>();
+            (RedisCollection<TOTDInfo>)redis.RedisCollection<TOTDInfo>();
 
         public async Task StoreDataAsync(TOTDInfo data, TimeSpan? expiry = null)
         {
             var totdId = data.Id;
+
             Log.Information("Storing data with key {Id} into the Redis database...", totdId);
             Log.Debug("Value found: {Data}", JsonSerializer.Serialize(data));
-            
+
             await _collection.InsertAsync(data, WhenKey.Always, expiry);
 
             Log.Information("Successfully stored data with key {Id}!", totdId);
         }
-        
+
         public TOTDInfo RetrieveData(string key)
         {
             Log.Information("Retrieving information for type {Type} with key {Key}...", nameof(TOTDInfo), key);
 
-            _collection.FindById(key);
-            if (!int.TryParse(key, out var keyAsInt))
+            var redisEntry = _collection.FindById(key);
+
+            Log.Information("Hellp");
+
+            if (redisEntry is null)
             {
-                Log.Error("{Key} is not a valid key! Cancelling search...", key);
+                Log.Error("Key {Key} was not found in the Redis database!", key);
                 return TOTDInfo.Empty;
             }
 
-            var redisEntry = _collection.Where(x => x.Id == keyAsInt).FirstOrDefault(TOTDInfo.Empty);
+            Log.Information("Found data with key {Key}!", key);
+            Log.Debug("Value found: {Id}", JsonSerializer.Serialize(redisEntry));
 
-            if (redisEntry == TOTDInfo.Empty)
-            {
-                Log.Error("Key {Key} was not found in the Redis database!", key);
-            }
-            else
-            {
-                Log.Information("Found data with key {Key}!", key);
-                Log.Debug("Value found: {Id}", JsonSerializer.Serialize(redisEntry));
-            }
-            
             return redisEntry;
         }
     }
@@ -117,33 +112,35 @@ internal sealed class GetTOTDInfo(
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapGet("/totd/map-info", async ([FromServices] GetTOTDInfo query) => 
+            app.MapGet("/nadeo/map-info", async ([FromServices] GetTOTDInfo query) => 
             {
                 return await query.HandleConsumeAndStorageAsync();
             });
         }
     }
 
-    protected override Consumer ConsumerComponent => new(liveServices);
-    protected override Repository RepositoryComponent => new(provider);
+    protected override Consumer ConsumerComponent => new(nadeoLive);
+    protected override Repository RepositoryComponent => new(redis);
 
-    public override async Task<TOTDInfo> HandleConsumeAsync()
+#pragma warning disable CS0114 // Member hides inherited member; missing override keyword
+    public async Task<TOTDInfo> HandleConsumeAsync()
     {
         return await base.HandleConsumeAsync();
     }
 
-    public override async Task HandleStorageAsync(TOTDInfo totdInfo, TimeSpan? expiry = null)
+    public async Task HandleStorageAsync(TOTDInfo totdInfo, TimeSpan? expiry = null)
     {
         await base.HandleStorageAsync(totdInfo, expiry);
     }
 
-    public override async Task<TOTDInfo> HandleConsumeAndStorageAsync(TimeSpan? expiry = null)
+    public async Task<TOTDInfo> HandleConsumeAndStorageAsync(TimeSpan? expiry = null)
     {
         return await base.HandleConsumeAndStorageAsync();
     }
 
-    public override TOTDInfo HandleRetrieval(string key)
+    public TOTDInfo HandleRetrieval(string key)
     {
         return base.HandleRetrieval(key);
     }
+#pragma warning restore CS0114 // Member hides inherited member; missing override keyword
 }

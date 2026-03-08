@@ -7,7 +7,7 @@ public interface IEndpoint
 
 #if !WEB_API
 // Empty implementation of Web project packages to satisfy the compiler
-internal interface IEndpointRouteBuilder;
+public interface IEndpointRouteBuilder;
 
 internal static class EmptyEndpointExtensions
 {

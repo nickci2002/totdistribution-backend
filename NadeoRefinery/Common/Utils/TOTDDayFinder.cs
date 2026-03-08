@@ -9,11 +9,16 @@ public static class TOTDDayFinder
         return CurrentParisianDateTime.GetTOTDDayOfTheMonth();
     }
 
-    public static int CreateRedisTOTDIdKey()
+    public static int CreateRedisTOTDIdKeyAsInt()
     {
         DateTime date = CurrentParisianDateTime;
-        
         return date.Year * 10000 + date.Month * 100 + date.GetTOTDDayOfTheMonth();
+    }
+
+    public static string CreateRedisTOTDIdKeyAsString()
+    {
+        int keyAsInt = CreateRedisTOTDIdKeyAsInt();
+        return keyAsInt.ToString();
     }
 
     private static int GetTOTDDayOfTheMonth(this DateTime date)

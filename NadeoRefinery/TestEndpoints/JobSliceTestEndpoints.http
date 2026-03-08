@@ -1,0 +1,6 @@
+@JobSliceHostAddress = http://localhost:5124/jobs
+
+###
+
+GET {{JobSliceHostAddress}}/begin-totd
+Accept: application/json

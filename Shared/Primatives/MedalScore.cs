@@ -9,8 +9,6 @@ public readonly record struct MedalScore(int Value) : IPrimitiveType<int>
 {
     public static implicit operator MedalScore(TimeInt32 value) =>
         new() { Value = value.TotalMilliseconds };
-
-    public override string ToString() => $"{Value}";
+    public static implicit operator int(MedalScore? score) =>
+        score is not null ? score.Value : int.MaxValue;
 }
-
-

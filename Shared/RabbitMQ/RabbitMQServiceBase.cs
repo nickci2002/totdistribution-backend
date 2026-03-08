@@ -13,8 +13,7 @@ public abstract class RabbitMQServiceBase(
     protected IConnection? Connection { get; private set; }
     protected IChannel? Channel { get; private set; }
 
-    private readonly ConnectionFactory _factory = new()
-    { 
+    private readonly ConnectionFactory _factory = new() { 
         HostName = "localhost",
         AutomaticRecoveryEnabled = true,
         TopologyRecoveryEnabled = true,

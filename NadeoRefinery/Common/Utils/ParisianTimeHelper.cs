@@ -3,7 +3,7 @@ namespace TOTDBackend.NadeoRefinery.Common.Utils;
 public static class ParisianTimeHelper
 {
     // Windows
-    private static readonly TimeZoneInfo ParisianTimeZoneInfo =
+    public static readonly TimeZoneInfo ParisianTimeZoneInfo =
         TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
 
     // Linux/macOS

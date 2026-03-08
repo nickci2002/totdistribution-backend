@@ -1,0 +1,30 @@
+@NadeoSliceHostAddress = http://localhost:5124/nadeo
+
+###
+
+GET {{NadeoSliceHostAddress}}/map-info
+Accept: application/json
+
+###
+
+POST {{NadeoSliceHostAddress}}/distribution
+Content-Type: application/json
+
+{
+    "mapUid": "vy6lBGXtA2bOLQ5Go6rce4uZRYl",
+    "groupUid": "dfab7073-9e1d-424f-b16b-ad39dee39c3c",
+    "authorScore": 51452,
+    "goldScore": 55000,
+    "silverScore": 62000,
+    "bronzeScore": 78000
+}
+
+###
+
+GET {{NadeoSliceHostAddress}}/author-record
+Content-Type: application/json
+
+{
+    "accountId": "38d7168e-f106-4d90-bf59-686b0adf9fc3",
+    "mapId" : "9a6a3edc-36aa-45b2-ba72-4473bc01c69c"
+}

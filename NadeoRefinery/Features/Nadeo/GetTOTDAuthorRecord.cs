@@ -10,11 +10,11 @@ using TOTDBackend.NadeoRefinery.Models.Responses;
 namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
 /// <inheritdoc cref="NadeoCommunicatorSlice{TResp}" />
-internal sealed class GetTOTDAuthorRecord(NadeoServices services)
+internal sealed class GetTOTDAuthorRecord(NadeoServices nadeo)
     : NadeoCommunicatorSlice<PlayerMapInfo, PlayerScore>
 {
     /// <inheritdoc cref="INadeoConsumerComponent{TReq, TResp}" />
-    internal class Consumer(NadeoServices services)
+    internal class Consumer(NadeoServices nadeo)
         : INadeoConsumerComponent<PlayerMapInfo, PlayerScore>
     {
         public async Task<PlayerScore> FetchDataAsync(PlayerMapInfo request)
@@ -23,7 +23,7 @@ internal sealed class GetTOTDAuthorRecord(NadeoServices services)
             var mapId = request.MapId;
             var groupUid = request.GroupUid;
             
-            var record = (await services.GetMapRecordsAsync(
+            var record = (await nadeo.GetMapRecordsAsync(
                 accountIds: [accountId],
                 mapId: mapId,
                 seasonId: groupUid))[0];
@@ -40,13 +40,13 @@ internal sealed class GetTOTDAuthorRecord(NadeoServices services)
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapGet("/totd/author-record", async (
+            app.MapGet("/nadeo/author-record", async (
                 [FromServices] GetTOTDAuthorRecord query, [FromBody] PlayerMapInfo request) =>
                     await query.HandleConsumeAsync(request));
         }
     }
 
-    protected override Consumer ConsumerComponent => new(services);
+    protected override Consumer ConsumerComponent => new(nadeo);
 
     public override async Task<PlayerScore> HandleConsumeAsync(PlayerMapInfo request)
     {

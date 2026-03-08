@@ -8,23 +8,14 @@ public static class RedisExtensions
 {
     public static IServiceCollection AddRedisDbServices(
         this IServiceCollection services,
-        IConfiguration config)
+        IConnectionMultiplexer multiplexer)
     {
-        var redisConnString = config.GetValue<string>("CM_ConnectionString")!;
-        var multiplexer = ConnectionMultiplexer.Connect(redisConnString);
-
-        services.AddSingleton<IConnectionMultiplexer>(sp => multiplexer);
+        services.AddSingleton(sp => multiplexer);
         services.AddSingleton(sp => 
         {
             var multiplexer = sp.GetRequiredService<IConnectionMultiplexer>();
             return new RedisConnectionProvider(multiplexer);
         });
-
-        // services.AddSingleton(sp =>
-        // {
-        //     var redisConnString = config.GetValue<string>("RCP_ConnectionString")!;
-        //     return new RedisConnectionProvider(redisConnString);
-        // });
 
         services.AddHostedService<IndexCreationService>();
 

@@ -34,4 +34,6 @@ public class Distribution
     public int NoneCount { get; set; }
 
     public int TotalCount => AuthorCount + GoldCount + SilverCount + BronzeCount + NoneCount;
+
+    public static readonly Distribution Empty = new();
 }

@@ -1,35 +1,39 @@
+using System.Linq.Expressions;
+using System.Reflection;
 using Hangfire;
-using TOTDBackend.NadeoRefinery.Hangfire;
+using TOTDBackend.NadeoRefinery.Common.Hangfire;
 
 namespace TOTDBackend.NadeoRefinery.Common.Features;
 
-internal interface IRecurringJobSlice
+public interface IRecurringJobSlice
 {
-    void AddOrUpdate();
+    void AddOrUpdate(RecurringJobManager manager);
     Task HandleAsync();
 }
 
 /// <inheritdoc cref="IRecurringJobSlice">
-internal abstract class RecurringJobSlice(RecurringJobManager jobManager) : IRecurringJobSlice
+internal abstract class RecurringJobSlice<TSelf> : IRecurringJobSlice
+    where TSelf: IRecurringJobSlice
 {
-    protected RecurringJobProperties RecurringJobProperties { get; }
+    protected abstract RecurringJobProperties JobProperties { get; }
     
-    protected string Id => RecurringJobProperties.Id;
-    protected string CronExpression => RecurringJobProperties.CronExpression;
-    protected TimeZoneInfo TimeZoneInfo => RecurringJobProperties.TimeZoneInfo;
+    protected string Id => JobProperties.Id;
+    protected string CronExpression => JobProperties.CronExpression;
+    protected TimeZoneInfo TimeZoneInfo => JobProperties.TimeZoneInfo;
     
-    protected RecurringJobOptions JobOptions => new()
-    {
+    protected RecurringJobOptions JobOptions => new() {
         TimeZone = TimeZoneInfo
     };
 
-    public void AddOrUpdate()
+    // Reflection method for service registering
+    public virtual void AddOrUpdate(RecurringJobManager manager)
     {
-        jobManager.AddOrUpdate(
-            recurringJobId: Id,
-            methodCall: () => HandleAsync(),
-            cronExpression: CronExpression,
-            options: JobOptions);
+        manager.AddOrUpdate<TSelf>(
+            Id,
+            job => job.HandleAsync(),
+            () => CronExpression,
+            JobOptions);
+
     }
 
     public abstract Task HandleAsync();

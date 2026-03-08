@@ -1,4 +1,4 @@
-namespace TOTDBackend.NadeoRefinery.Hangfire;
+namespace TOTDBackend.NadeoRefinery.Common.Hangfire;
 
 internal readonly record struct RecurringJobProperties(
     string Id,
