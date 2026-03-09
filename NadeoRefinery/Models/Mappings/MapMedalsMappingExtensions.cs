@@ -9,7 +9,7 @@ public static partial class MappingExtensions
     {
         return new MapMedals
         {
-            MapUid = info.MapGuid.ToString(),
+            MapUid = info.MapUid,
             GroupUid = info.SeasonGuid.ToString(),
             AuthorScore = info.AuthorTime,
             GoldScore = info.GoldTime,

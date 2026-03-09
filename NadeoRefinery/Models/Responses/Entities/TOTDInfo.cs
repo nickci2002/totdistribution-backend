@@ -82,7 +82,7 @@ public class TOTDInfo : IRedisEntity
     IRedisEntity IRedisEntity.Dehashify(HashEntry[]? entries) => Dehashify(entries);
 
     /// DELETE LATER THIS IS ONLY FOR DATABASE FIXING
-    public TOTDInfo RecoveryDehashify(HashEntry[]? entries)
+    public static TOTDInfo RecoveryDehashify(HashEntry[]? entries)
     {
         if (entries is null)
         {
@@ -94,21 +94,19 @@ public class TOTDInfo : IRedisEntity
         return new TOTDInfo
         {
             Id = (int)dict[nameof(Id)],
-            MapUid = new MapUid(dict[GetFieldWithValue(MapUid)].ToString()),
-            MapGuid = new MapGuid(Guid.Parse(dict[GetFieldWithValue(MapGuid)].ToString())),
-            SeasonGuid = new MapGuid(Guid.Parse(dict[GetFieldWithValue(SeasonGuid)].ToString())),
+            MapUid = new MapUid(dict["MapUid.Value"].ToString()),
+            MapGuid = new MapGuid(Guid.Parse(dict["MapGuid.Value"].ToString())),
+            SeasonGuid = new MapGuid(Guid.Parse(dict["SeasonGuid.Value"].ToString())),
             Name = dict[nameof(Name)].ToString(),
-            Author = new PlayerGuid(Guid.Parse(dict[GetFieldWithValue(Author)].ToString())),
-            Submitter = new PlayerGuid(Guid.Parse(dict[GetFieldWithValue(Submitter)].ToString())),
-            AuthorTime = new MedalScore((int)dict[GetFieldWithValue(AuthorTime)]),
-            GoldTime = new MedalScore((int)dict[GetFieldWithValue(GoldTime)]),
-            SilverTime = new MedalScore((int)dict[GetFieldWithValue(SilverTime)]),
-            BronzeTime = new MedalScore((int)dict[GetFieldWithValue(BronzeTime)]),
-            UploadTimestamp = DateTimeOffset.FromUnixTimeSeconds((long)dict[nameof(UploadTimestamp)]),
-            UpdateTimestamp = DateTimeOffset.FromUnixTimeSeconds((long)dict[nameof(UpdateTimestamp)]),
+            Author = new PlayerGuid(Guid.Parse(dict["Author.Value"].ToString())),
+            Submitter = new PlayerGuid(Guid.Parse(dict["Submitter.Value"].ToString())),
+            AuthorTime = new MedalScore((int)dict["AuthorTime.Value"]),
+            GoldTime = new MedalScore((int)dict["GoldTime.Value"]),
+            SilverTime = new MedalScore((int)dict["SilverTime.Value"]),
+            BronzeTime = new MedalScore((int)dict["BronzeTime.Value"]),
+            UploadTimestamp = DateTimeOffset.Parse(dict[nameof(UploadTimestamp)].ToString()),
+            UpdateTimestamp = DateTimeOffset.Parse(dict[nameof(UpdateTimestamp)].ToString()),
             ThumbnailUrl = dict[nameof(ThumbnailUrl)].ToString()
         };
     }
-
-    private string GetFieldWithValue(object o) => $"{nameof(o)}.Value";
 }

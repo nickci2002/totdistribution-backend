@@ -9,3 +9,8 @@ Accept: application/json
 
 GET {{JobSliceHostAddress}}/end-totd
 Accept: application/json
+
+###
+
+POST {{JobSliceHostAddress}}/fix-redis-data
+Content-Type: application/json

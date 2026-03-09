@@ -95,7 +95,7 @@ internal sealed class GetTOTDInfo(
             Log.Information("Retrieving information for type {Type} with key {Key}...", nameof(TOTDInfo), key);
             
             var fullKey = TOTDInfo.GetKey(key);
-            var entries = _db.HashGetAll($"totd:{key}");
+            var entries = _db.HashGetAll(fullKey);
             if (entries.Length == 0)
             {
                 Log.Error("Key {Key} was not found in the Redis database!", fullKey);

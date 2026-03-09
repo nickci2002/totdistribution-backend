@@ -14,7 +14,7 @@ public static class RedisExtensions
         this IServiceCollection services,
         IConfiguration config)
     {
-        services.AddSingleton(sp => {
+        services.AddSingleton<IConnectionMultiplexer>(sp => {
             var redisConnString = config.GetSection("Redis").GetValue<string>("CM_ConnectionString")!;
             return ConnectionMultiplexer.Connect(redisConnString);
         });

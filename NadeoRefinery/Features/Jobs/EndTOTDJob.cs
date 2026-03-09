@@ -25,7 +25,7 @@ internal sealed class EndTOTDJob(IServiceProvider provider) : RecurringJobSlice<
 
     protected override RecurringJobProperties JobProperties => new() {
         Id = "end-totd",
-        CronExpression = "51 18 * * *", // One minute before the TOTD switches
+        CronExpression = "59 18 * * *", // One minute before the TOTD switches
         TimeZoneInfo = ParisianTimeHelper.ParisianTimeZoneInfo
     };
 

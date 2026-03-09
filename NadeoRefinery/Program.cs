@@ -1,6 +1,7 @@
 using System.Reflection;
 using Serilog.Extensions.Hosting;
 using TOTDBackend.NadeoRefinery.Extensions;
+using TOTDBackend.NadeoRefinery.Features;
 using TOTDBackend.NadeoRefinery.Features.Nadeo;
 using TOTDBackend.Shared.RabbitMQ;
 
@@ -25,6 +26,8 @@ builder.Services.AddJobSliceServices(sliceTypes);
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
 builder.Services.AddNadeoSliceServices(sliceTypes);
 builder.Services.AddRedisDbServices(config);
+
+//builder.Services.AddTransient<FixRedisData>();
 
 builder.Services.AddTestingEndpoints(sliceTypes);
 
