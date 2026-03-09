@@ -68,9 +68,9 @@ internal sealed class EndTOTDJob(IServiceProvider provider) : RecurringJobSlice<
             // In the future, we'll just set up another thing for updates
             await totdDistributionService.HandleStorageAsync(distribution);
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error("""There was an error occurred executing job "EndTOTDFetchJob".""");
+            Log.Error(e, """There was an error occurred executing job "EndTOTDFetchJob".""");
             return;
         }
         finally

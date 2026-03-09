@@ -1,7 +1,7 @@
 using ManiaAPI.NadeoAPI;
 using Microsoft.AspNetCore.Mvc;
-using Redis.OM;
-using Redis.OM.Searching;
+using RabbitMQ.Client;
+using StackExchange.Redis;
 using System.Diagnostics;
 using System.Text.Json;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
@@ -14,7 +14,7 @@ namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 /// <inheritdoc cref="NadeoCommunicatorWithStorageSlice{TResp}" />
 internal sealed class GetTOTDInfo(
     NadeoLiveServices nadeoLive,
-    RedisConnectionProvider redis)
+    IConnectionMultiplexer redis)
     : NadeoCommunicatorWithStorageSlice<TOTDInfo>
 {
     /// <inheritdoc cref="INadeoConsumerComponent{TResp}" />
@@ -68,20 +68,24 @@ internal sealed class GetTOTDInfo(
     }
 
     /// <inheritdoc cref="IRedisRepositoryComponent{T}" />
-    internal sealed class Repository(RedisConnectionProvider redis)
+    internal sealed class Repository(IConnectionMultiplexer redis)
         : IRedisRepositoryComponent<TOTDInfo>
     {
-        private readonly RedisCollection<TOTDInfo> _collection =
-            (RedisCollection<TOTDInfo>)redis.RedisCollection<TOTDInfo>();
+        private readonly IDatabase _db = redis.GetDatabase();
 
         public async Task StoreDataAsync(TOTDInfo data, TimeSpan? expiry = null)
         {
-            var totdId = data.Id;
+            var totdId = data.Id.ToString();
 
             Log.Information("Storing data with key {Id} into the Redis database...", totdId);
             Log.Debug("Value found: {Data}", JsonSerializer.Serialize(data));
+            
+            var key = TOTDInfo.GetKey(totdId);
+            var entries = data.Hashify();
+            await _db.HashSetAsync(key, entries);
 
-            await _collection.InsertAsync(data, WhenKey.Always, expiry);
+            if (expiry.HasValue)
+                await _db.KeyExpireAsync(key, expiry);
 
             Log.Information("Successfully stored data with key {Id}!", totdId);
         }
@@ -89,18 +93,23 @@ internal sealed class GetTOTDInfo(
         public TOTDInfo RetrieveData(string key)
         {
             Log.Information("Retrieving information for type {Type} with key {Key}...", nameof(TOTDInfo), key);
-
-            var redisEntry = _collection.FindById(key);
-
-            Log.Information("Hellp");
-
-            if (redisEntry is null)
+            
+            var fullKey = TOTDInfo.GetKey(key);
+            var entries = _db.HashGetAll($"totd:{key}");
+            if (entries.Length == 0)
             {
-                Log.Error("Key {Key} was not found in the Redis database!", key);
+                Log.Error("Key {Key} was not found in the Redis database!", fullKey);
                 return TOTDInfo.Empty;
             }
 
-            Log.Information("Found data with key {Key}!", key);
+            var redisEntry = TOTDInfo.Dehashify(entries);
+            if (redisEntry == TOTDInfo.Empty)
+            {
+                Log.Error("Key {Key} was not found in the Redis database!", fullKey);
+                return TOTDInfo.Empty;
+            }
+
+            Log.Information("Found data with key {Key}!", fullKey);
             Log.Debug("Value found: {Id}", JsonSerializer.Serialize(redisEntry));
 
             return redisEntry;

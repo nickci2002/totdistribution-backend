@@ -28,8 +28,8 @@ public static class HangfireExtensions
     {
         services.AddSingleton<RecurringJobManager>();
 
-        services.AddScoped<IRecurringJobSlice, BeginTOTDJob>();
-        services.AddScoped<IRecurringJobSlice, EndTOTDJob>();
+        services.AddScoped</*IRecurringJobSlice, */BeginTOTDJob>();
+        services.AddScoped</*IRecurringJobSlice, */EndTOTDJob>();
         
         // var sliceServices = types
         //     .Where(t => typeof(IRecurringJobSlice).IsAssignableFrom(t.AsType()))

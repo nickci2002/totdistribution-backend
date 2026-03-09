@@ -1,6 +1,10 @@
+using System.Text.Json;
+using Microsoft.Extensions.Options;
 using Redis.OM;
+using Redis.OM.Searching;
 using StackExchange.Redis;
 using TOTDBackend.NadeoRefinery.Models.Entities;
+using TOTDBackend.Shared.Json;
 
 namespace TOTDBackend.NadeoRefinery.Extensions;
 
@@ -8,16 +12,12 @@ public static class RedisExtensions
 {
     public static IServiceCollection AddRedisDbServices(
         this IServiceCollection services,
-        IConnectionMultiplexer multiplexer)
+        IConfiguration config)
     {
-        services.AddSingleton(sp => multiplexer);
-        services.AddSingleton(sp => 
-        {
-            var multiplexer = sp.GetRequiredService<IConnectionMultiplexer>();
-            return new RedisConnectionProvider(multiplexer);
+        services.AddSingleton(sp => {
+            var redisConnString = config.GetSection("Redis").GetValue<string>("CM_ConnectionString")!;
+            return ConnectionMultiplexer.Connect(redisConnString);
         });
-
-        services.AddHostedService<IndexCreationService>();
 
         return services;
     }
@@ -39,4 +39,3 @@ public static class RedisExtensions
         }
     }
 }
-

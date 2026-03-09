@@ -4,3 +4,8 @@
 
 GET {{JobSliceHostAddress}}/begin-totd
 Accept: application/json
+
+###
+
+GET {{JobSliceHostAddress}}/end-totd
+Accept: application/json

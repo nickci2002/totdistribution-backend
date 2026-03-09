@@ -1,6 +1,5 @@
 using System.Reflection;
 using Serilog.Extensions.Hosting;
-using StackExchange.Redis;
 using TOTDBackend.NadeoRefinery.Extensions;
 using TOTDBackend.NadeoRefinery.Features.Nadeo;
 using TOTDBackend.Shared.RabbitMQ;
@@ -22,12 +21,10 @@ var sliceTypes = Assembly
     .DefinedTypes
     .Where((type) => type is { IsInterface: false, IsAbstract: false });
 
-var redisConnString = config.GetSection("Redis").GetValue<string>("CM_ConnectionString")!;
-var multiplexer = ConnectionMultiplexer.Connect(redisConnString);
-
+builder.Services.AddJobSliceServices(sliceTypes);
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
 builder.Services.AddNadeoSliceServices(sliceTypes);
-builder.Services.AddRedisDbServices(multiplexer);
+builder.Services.AddRedisDbServices(config);
 
 builder.Services.AddTestingEndpoints(sliceTypes);
 
@@ -65,14 +62,11 @@ var sliceTypes = Assembly
     .DefinedTypes
     .Where((type) => type is { IsInterface: false, IsAbstract: false });
 
-var redisConnString = config.GetSection("Redis").GetValue<string>("CM_ConnectionString")!;
-var multiplexer = ConnectionMultiplexer.Connect(redisConnString);
-
 builder.Services.AddHangfireServices(multiplexer);
 builder.Services.AddJobSliceServices(sliceTypes);
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
 builder.Services.AddNadeoSliceServices(sliceTypes);
-builder.Services.AddRedisDbServices(multiplexer);
+builder.Services.AddRedisDbServices(config);
 
 var app = builder.Build();
 

@@ -11,12 +11,12 @@ POST {{NadeoSliceHostAddress}}/distribution
 Content-Type: application/json
 
 {
-    "mapUid": "vy6lBGXtA2bOLQ5Go6rce4uZRYl",
-    "groupUid": "dfab7073-9e1d-424f-b16b-ad39dee39c3c",
-    "authorScore": 51452,
-    "goldScore": 55000,
-    "silverScore": 62000,
-    "bronzeScore": 78000
+    "mapUid": "5oht3OwltCP_gYrnV4YGT9JfsKg",
+    "groupUid": "e8598ebd-f323-47e4-926b-c35f13ec8f97",
+    "authorScore": 48000,
+    "goldScore": 51000,
+    "silverScore": 58000,
+    "bronzeScore": 73000
 }
 
 ###
