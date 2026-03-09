@@ -1,11 +1,9 @@
 using ManiaAPI.NadeoAPI;
-using Redis.OM.Modeling;
 using StackExchange.Redis;
 using TOTDBackend.Shared.Primatives;
 
 namespace TOTDBackend.NadeoRefinery.Models.Entities;
 
-[Document(Prefixes = new[] { "totd:distribution" })]
 public class Distribution : IRedisEntity
 {
     public static string KeyPrefix { get; } = "totd:distribution";

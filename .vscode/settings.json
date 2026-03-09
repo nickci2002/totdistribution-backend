@@ -1,3 +1,4 @@
 {
-    "dotnet.defaultSolution": "TOTDBackend.slnx"
+    "dotnet.defaultSolution": "TOTDBackend.slnx",
+    "editor.rulers": [100, 120]
 }

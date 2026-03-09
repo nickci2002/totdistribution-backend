@@ -1,16 +1,14 @@
 using ManiaAPI.NadeoAPI;
-using Redis.OM;
-using Redis.OM.Searching;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using StackExchange.Redis;
+using System.Collections.Immutable;
 using TOTDBackend.NadeoRefinery.Common.Endpoints;
 using TOTDBackend.NadeoRefinery.Common.Features;
 using TOTDBackend.NadeoRefinery.Models.Requests;
 using TOTDBackend.NadeoRefinery.Common.Utils;
 using TOTDBackend.NadeoRefinery.Models.Entities;
 using TOTDBackend.Shared.Primatives;
-using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
-using StackExchange.Redis;
-using System.Collections.Immutable;
 
 namespace TOTDBackend.NadeoRefinery.Features.Nadeo;
 
@@ -56,32 +54,7 @@ internal sealed class GetTOTDDistribution(
             var silverCount = positionDataList[(int)MedalType.Silver] - positionDataList[(int)MedalType.Gold];
             var bronzeCount = positionDataList[(int)MedalType.Bronze] - positionDataList[(int)MedalType.Gold];
             var noneCount = positionDataList[(int)MedalType.None] - positionDataList[(int)MedalType.Bronze];
-
-            // var numRequests = Enum.GetNames<MedalType>().Length;
-            // var positionList = new int[5];
-            // for (int i = 0; i < numRequests; i++)
-            // {
-            //     var score = request.GetScore(i);
-
-            //     Log.Verbose("Fetching position for medal type {MedalType} with score {Score}...", (MedalType)i, score);
-                
-            //     var position = await nadeoLive.GetLeaderboardPositionByTimeAsync(mapUid, groupUid, score);
-
-            //     Log.Verbose("Position: {pos} | Length: {length}", position, position.Count);
-
-            //     var positionData = position.ElementAt(0);
-            //     positionList[i] = positionData.Zones[0].Ranking.Position - 1;
-            // }
-
-            // Log.Information("Finished fetching data!");
-            // Log.Information("Formatting distribution data for proper storage...");
-
-            // var authorCount = positionList[(int)MedalType.Author];
-            // var goldCount = positionList[(int)MedalType.Gold] - positionList[(int)MedalType.Author];
-            // var silverCount = positionList[(int)MedalType.Silver] - positionList[(int)MedalType.Gold];
-            // var bronzeCount = positionList[(int)MedalType.Bronze] - positionList[(int)MedalType.Gold];
-            // var noneCount = positionList[(int)MedalType.None] - positionList[(int)MedalType.Bronze];
-
+            
             Log.Information("Finished formatting data!");
 
             return new Distribution
