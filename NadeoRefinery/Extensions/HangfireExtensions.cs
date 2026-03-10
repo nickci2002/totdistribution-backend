@@ -18,7 +18,11 @@ public static class HangfireExtensions
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UseRedisStorage(multiplexer, new RedisStorageOptions()));
-        services.AddHangfireServer();
+
+        services.AddHangfireServer(options => {
+            options.WorkerCount = 2;
+            options.SchedulePollingInterval = TimeSpan.FromSeconds(30);
+        });
 
         return services;
     }
@@ -28,8 +32,8 @@ public static class HangfireExtensions
     {
         services.AddSingleton<RecurringJobManager>();
 
-        services.AddScoped</*IRecurringJobSlice, */BeginTOTDJob>();
-        services.AddScoped</*IRecurringJobSlice, */EndTOTDJob>();
+        services.AddScoped<IRecurringJobSlice, BeginTOTDJob>();
+        services.AddScoped<IRecurringJobSlice, EndTOTDJob>();
         
         // var sliceServices = types
         //     .Where(t => typeof(IRecurringJobSlice).IsAssignableFrom(t.AsType()))
