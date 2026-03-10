@@ -2,5 +2,7 @@
   <Project Path="CoreWebApi/CoreWebApi.csproj" />
   <Project Path="NadeoRefinery/NadeoRefinery.csproj" />
   <Project Path="Shared/Shared.csproj" />
+  <Project Path="TOTDBackend.AppHost/TOTDBackend.AppHost.csproj" />
+  <Project Path="TOTDBackend.ServiceDefaults/TOTDBackend.ServiceDefaults.csproj" />
   <Project Path="TOTDistribution.Test/TOTDistribution.Test.csproj" />
 </Solution>
