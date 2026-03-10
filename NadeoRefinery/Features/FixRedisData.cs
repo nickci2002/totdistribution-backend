@@ -98,8 +98,6 @@ internal sealed class FixRedisData
                         fixedCount++;
                     }
                 }
-
-                return Results.Ok($"Fixed {fixedCount} records");
             });
         }
     }

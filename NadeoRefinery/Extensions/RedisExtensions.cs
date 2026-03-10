@@ -6,12 +6,9 @@ public static class RedisExtensions
 {
     public static IServiceCollection AddRedisDbServices(
         this IServiceCollection services,
-        IConfiguration config)
+        IConnectionMultiplexer multiplexer)
     {
-        services.AddSingleton<IConnectionMultiplexer>(sp => {
-            var redisConnString = config.GetSection("Redis").GetValue<string>("CM_ConnectionString")!;
-            return ConnectionMultiplexer.Connect(redisConnString);
-        });
+        services.AddSingleton(sp => multiplexer);
 
         return services;
     }
