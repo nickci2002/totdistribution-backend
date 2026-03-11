@@ -23,10 +23,13 @@ var sliceTypes = Assembly
     .DefinedTypes
     .Where((type) => type is { IsInterface: false, IsAbstract: false });
 
+var redisConnString = config.GetSection("Redis").GetValue<string>("CM_ConnectionString")!;
+var multiplexer = ConnectionMultiplexer.Connect(redisConnString);
+
 builder.Services.AddJobSliceServices(sliceTypes);
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
 builder.Services.AddNadeoSliceServices(sliceTypes);
-builder.Services.AddRedisDbServices(config);
+builder.Services.AddRedisDbServices(multiplexer);
 
 //builder.Services.AddTransient<FixRedisData>();
 
