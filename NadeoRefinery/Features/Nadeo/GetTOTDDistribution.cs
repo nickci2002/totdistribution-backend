@@ -84,7 +84,7 @@ internal sealed class GetTOTDDistribution(
             Log.Information("Storing data with key {Id} into the Redis database...", totdId);
             Log.Debug("Value found: {Data}", JsonSerializer.Serialize(data));
             
-            var key = TOTDInfo.GetKey(totdId);
+            var key = Distribution.GetKey(totdId);
             var entries = data.Hashify();
             await _db.HashSetAsync(key, entries);
 
