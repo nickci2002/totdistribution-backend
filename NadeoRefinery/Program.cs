@@ -23,8 +23,7 @@ var sliceTypes = Assembly
     .DefinedTypes
     .Where((type) => type is { IsInterface: false, IsAbstract: false });
 
-var redisConnString = config.GetSection("Redis").GetValue<string>("CM_ConnectionString")!;
-var multiplexer = ConnectionMultiplexer.Connect(redisConnString);
+var multiplexer = builder.GetRedisMultiplexer(config)!;
 
 builder.Services.AddJobSliceServices(sliceTypes);
 builder.Services.AddNadeoAPIServices(config.GetSection("NadeoAPI"));
@@ -69,8 +68,7 @@ var sliceTypes = Assembly
     .DefinedTypes
     .Where((type) => type is { IsInterface: false, IsAbstract: false });
 
-var redisConnString = config.GetSection("Redis").GetValue<string>("CM_ConnectionString")!;
-var multiplexer = ConnectionMultiplexer.Connect(redisConnString);
+var multiplexer = builder.GetRedisMultiplexer(config)!;
 
 builder.Services.AddHangfireServices(multiplexer);
 builder.Services.AddJobSliceServices(sliceTypes);
