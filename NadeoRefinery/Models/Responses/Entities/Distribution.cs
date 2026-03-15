@@ -32,7 +32,8 @@ public class Distribution : IRedisEntity
             new(nameof(GoldCount), GoldCount),
             new(nameof(SilverCount), SilverCount),
             new(nameof(BronzeCount), BronzeCount),
-            new(nameof(NoneCount), NoneCount)
+            new(nameof(NoneCount), NoneCount),
+            new(nameof(TotalCount), TotalCount)
         ];
     }
 
